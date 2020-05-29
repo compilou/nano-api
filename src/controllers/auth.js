@@ -7,15 +7,6 @@ const { Render, RENDER_UNPRIVILEDGED } = require('../lib/render');
 const { ACL, UpdateSession, ClearSession } = require('../lib/ACL');
 const { SandboxCPF, findOne, saveOne } = require('../lib/utils');
 
-const initializeUser = (user) => {
-  user.createdAt = new Date();
-  user.fullname = user.username;
-  user.username = user.username.replace(/[^0-9]/g, '');
-  user.active = true;
-  user.admin = false;
-  user.dummy = req.header('IS-DUMMY');
-  return user;
-}
 
 class Auth extends Controller {
 
@@ -56,9 +47,15 @@ class Auth extends Controller {
           return Render(res, `Falha ao localizar '${req.body.username}'.`, 403);
         }
 
-        const user = initializeUser(req.body);
+        const user = req.body;
+        user.createdAt = new Date();
+        user.fullname = user.username;
+        user.username = user.username.replace(/[^0-9]/g, '');
+        user.active = true;
+        user.admin = false;
+        user.dummy = req.header('IS-DUMMY');
 
-        return UserAPI({ username: user.username })
+        return UserAPI({ username: user.username }, { username: user.username })
           .then((found) => Render(res, `Cadastro localizado: ${found.fullname}.`, 309))
           .catch(() => {
             user.password = passwordMaker(user.password);

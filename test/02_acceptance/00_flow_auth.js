@@ -44,9 +44,22 @@ const CPFs = Array(10)
         .post('/auth')
         .send(InvalidUser)
         .end((error, response) => {
+          console.log('wat deu');
+          console.log('wat deu');
+          console.log('wat deu');
+          console.log('wat deu');
+          console.log('wat deu');
+          console.log('wat deu');
+          console.log('wat deu');
           if (error) {
+            console.log('deu erro', error);
+            console.log('deu erro', error);
+            console.log('deu erro', error);
+            console.log('deu erro', error);
+            console.log('deu erro', error);
             return next(new Error(error));
           }
+          console.log('adelante', response.body);
           expect(response.statusCode).to.equal(403);
           expect(response).to.not.have.cookie('session');
           next();
