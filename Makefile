@@ -72,15 +72,20 @@ check-host:
 install: # Build container.
 	@docker build --force-rm -t lambdadeveloper/nano-api . -f ./Dockerfile
 
+clean: # Remove dependencies.
+	@$(DOCKER_START) -it lambdadeveloper/nano-api     \
+		rm -Rf node_modules .nyc_output .pid report.* \
+		coverage public/* .circleci/pre-processed.yml
+
 
 #
-launch: # Executes application locally
+launch: # Executes application locally.
 	@$(DOCKER_START) -it -p "80:80" lambdadeveloper/nano-api
 
-launch-cmd: # Executes application locally
+launch-cmd: # Executes application locally.
 	@$(DOCKER_START) -it -p "80:80" lambdadeveloper/nano-api sh
 
-launch-dry: # Executes application locally without port forward
+launch-dry: # Executes application locally without port forward.
 	@$(DOCKER_START) -it lambdadeveloper/nano-api sh
 
 
