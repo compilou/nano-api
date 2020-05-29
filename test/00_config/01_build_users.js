@@ -62,6 +62,8 @@ const {
             delete(this.finished);
             Model.DB.disconnect();
 
+            process.stdout.write('\r');
+
             return done();
           }
           process.stdout.write('.');

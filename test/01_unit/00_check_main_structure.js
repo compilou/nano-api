@@ -4,13 +4,14 @@ const {
 
 const APP = require('../../src/index');
 
-var Application;
-var Routes;
 var Resources = {};
+var Routes = {};
+var Application;
 
 const RESOURCE_TYPES = {
   Cluster: {
     'Este é o processo principal': (next) => (expect(this.Cluster.isMaster).to.be.true, next()),
+    'Podemos aproveitar melhor esses CORES parados': (next) => (expect(this.Cluster.fork).to.be.Function, next()),
   }
 };
 
@@ -33,21 +34,21 @@ const RESOURCE_TYPES = {
             `Recurso ${resource} carregado`.test((done) => {
               Resources[resource] = App[resource];
 
-                `Executando recurso ${resource}`
-                  .testList(() => {
-                    const RESOURCE = RESOURCE_TYPES[resource]
-                    if (!!RESOURCE) {
-                      return Object.keys(RESOURCE)
-                        .forEach((description) => {
-                          `${description}`.test((next) => next());
-                        });
-                    }
-                    `Nenhum teste provido para ${resource}`
-                    .test(function (next) {
-                      this.skip();
-                      next();
+              `Executando recurso ${resource}`
+                .testList(() => {
+                  const RESOURCE = RESOURCE_TYPES[resource];
+                  if (!(RESOURCE)) {
+                    return `Nenhum teste provido para ${resource}`
+                      .test(function (next) {
+                        this.skip();
+                        next();
+                      });
+                  }
+                  Object.keys(RESOURCE)
+                    .forEach((description) => {
+                      `${description}`.test((next) => next());
                     });
-                  })
+                });
 
               done();
             });
@@ -55,15 +56,13 @@ const RESOURCE_TYPES = {
         });
     });
 
-    'Carrega rotas'
-      .test((done) => {
-
-        done();
+    context('Carrega rotas', function () {
+      Object.keys(Routes).forEach((route) => {
+        `Métodos permitidos para ${route}`.test((done) => { done();});
+        `Atualizando rotas Apiary ${route}`.test((done) => { done();});
       });
+    });
 
-    'Finaliza'
-      .test((done) => {
-
-        done();
-      });
+    'Finaliza aplicação'
+      .test((done) => Application.shutdown('closing tests', () => done()));
   });
