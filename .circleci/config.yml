@@ -230,7 +230,14 @@ workflows:
 
     jobs:
 
-      - qa-make
+      - qa-make:
+          filters:
+            branches:
+              only:
+                - master
+                - develop
+                - homolog
+                - /^fix[\/-].*$/
 
       - qa-lint:
           requires:

@@ -13,7 +13,7 @@ const SocketIO = require('socket.io');
 const Express = require('express');
 const Cluster = require('cluster');
 const Routes = require('./routes');
-const { ƒ } = require('...');
+const { ƒ } = require('src/.../index');
 const FS = require('fs');
 const OS = require('os');
 
@@ -145,6 +145,7 @@ else {
       req.session.nowInMinutes = Math.floor(Date.now() / 60e3);
       next();
     })
+    .use(Express.static('./docs'))
     .use(Express.static('./public'));
 
   Application.Server.ACTIVE_USERS = [];
