@@ -17,6 +17,8 @@ const { ƒ } = require('src/.../index');
 const FS = require('fs');
 const OS = require('os');
 
+const IPC = require('node-ipc');
+
 const {
   PORT = 80,
 } = process.env;
@@ -46,7 +48,9 @@ class μ {
 
 
   constructor(...arg) {
-    this.Cluster = Cluster;
+    const hierarchy = ['Worker', 'Master'][Cluster.isMaster+0];
+    this.daemon = this.constructor.name.concat('.', hierarchy);
+    this.thread = this.handleIPC(Cluster);
     this.config = {
       DEBUG: false,
       PORT: PORT,
@@ -57,6 +61,26 @@ class μ {
         Object.keys((configs))
           .forEach(((config) => (this.config[config] = configs[config])));
       }
+    });
+  }
+
+
+  handleIPC(Cluster) {
+    process.title = `${this.daemon}...`;
+    Object.assign(IPC.config, {
+      id: `${this.daemon}...`,
+      retry: 1500,
+      silent: true
+    });
+    IPC.connectTo(this.daemon, () => {
+      IPC.of['jest-observer'].on('connect', () => {
+        IPC.of['jest-observer'].emit('beam', 'die');
+        IPC.serve(() => IPC.server.on(this.daemon, (signal) => {
+          console.log('signal received:', signal);
+          process.exit(0);
+        }));
+        IPC.server.start();
+      });
     });
   }
 
@@ -88,7 +112,6 @@ class μ {
     this.Gateway = this.Server.listen(
       this.config.PORT,
       () => {
-        process.title = `μ.${['Worker', 'Master'][this.Cluster.isMaster + 0]}`;
         this.log([process.title, process.pid], 'using port:', this.config.PORT, 'on', this.Endpoints());
       });
 
@@ -123,12 +146,30 @@ if (module !== require.main) {
   module.exports = μ;
 }
 else {
+
   const Application = new μ({
     DEBUG: false,
   }).start();
 
-  // ['exit', 'SIGINT', 'SIGUSR1', 'SIGUSR2', 'SIGTERM' , 'uncaughtException']
-  //   .forEach((event) => process.on(event, () => Application.shutdown(event)));
+  ['exit', 'SIGINT', 'SIGUSR1', 'SIGUSR2', 'SIGTERM' , 'uncaughtException']
+    .forEach((event) => process.on(event, () => Application.shutdown(event)));
+
+
+
+  process.argv.forEach((arg) => {
+    switch (arg) {
+      case 'bend':
+
+        Application.Server.emit('request', 'bend');
+        process.exit(0);
+        break;
+
+      default:
+        console.log('arg', arg);
+        break;
+    }
+  });
+
 
   Application
     .Server
@@ -151,6 +192,11 @@ else {
   Application.Server.ACTIVE_USERS = [];
 
   Routes(Application.Server, Controllers);
+
+
+  Application.Server.on('request', (request) => {
+    console.log('do it', request);
+  });
 
   setInterval(() => {
     Application.Server.emit('ping', '1');

@@ -41,8 +41,6 @@ class Auth extends Controller {
         : Render(res, `Usuário ${found.username} ou senha incorretos.`, 403, [found, req.body]))
 
       .catch((error) => {
-        console.log('ops', error, auth);
-
         if (((error && error.found !== null)) || !SandboxCPF(req.body.username)) {
           return Render(res, `Falha ao localizar '${req.body.username}'.`, 403);
         }

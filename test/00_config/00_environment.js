@@ -43,7 +43,7 @@ const {
 
 
     'Variáveis de ambiente corretas para o MongoDB'
-      .skippable((next) => {
+      .test((next) => {
         const {
           MONGODB_URL = process.env.MONGODB_RESOURCE,
           MONGODB_CFG = {
