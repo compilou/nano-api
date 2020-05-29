@@ -23,6 +23,7 @@
     "chai": "^4.2.0",
     "chai-http": "^4.3.0",
     "documentation": "^13.0.0",
+    "doxygen": "^0.3.2",
     "esdoc": "^1.1.0",
     "esdoc-standard-plugin": "^1.0.0",
     "eslint": "^7.1.0",
@@ -32,24 +33,33 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
+    "jsdoc": "^3.6.4",
+    "marked": "^1.1.0",
     "mocha": "^7.2.0",
     "mochawesome": "^6.1.1",
     "nodemon": "^1.19.2",
     "nyc": "^15.0.1"
   },
   "scripts": {
-    "doc": "export NODE_PATH=. && esdoc && test-cover && test-report",
-    "doc-gen": "documentation build src/** -f html -o docs/API/",
+    "doc": "yarn doc-jsdoc; yarn doc-mentation; yarn doc-esdoc",
+    "doc-esdoc": "echo 'ESDoc não tem funcionado muito bem' && exit 0; export NODE_PATH=. && yarn esdoc",
+    "doc-jsdoc": "export NODE_PATH=. && yarn jsdoc -r ./src/**/* ./test/**/* -d docs/jsdoc",
+    "doc-mentation": "export NODE_PATH=. && documentation build ./src/* ./src/**/* ./test/**/* -f html -o docs/documentation --resolve node",
     "lint": "export NODE_PATH=. && eslint ./",
-    "test": "export NODE_PATH=. && mocha",
-    "test-all": "yarn test --recursive",
+    "test": "export NODE_PATH=. && mocha --recursive",
+    "test-all": "yarn test-cover; yarn test-report",
     "test-push": "export NODE_PATH=. && cc-test-reporter after-build -t lcov",
-    "test-cover": "export NODE_PATH=. && nyc --all --reporter=lcov --reporter=text mocha --recursive --exclude public,docs",
-    "test-report": "export NODE_PATH=. ; mocha --reporter mochawesome --reporter-options reportDir=./docs/mocha,reportFilename=index.html,charts=true,showSkipped=true,showHooks=true --recursive",
+    "test-cover": "export NODE_PATH=. && nyc --all --reporter=lcov --reporter=text mocha --recursive --exclude public --exclude docs --exclude coverage --exclude .nyc_output --report-dir docs/cover",
+    "test-report": "export NODE_PATH=. ; mocha --reporter mochawesome --reporter-options reportDir=./docs/,reportFilename=index.html,charts=true,showSkipped=true,showHooks=true --recursive",
     "default": "export NODE_PATH=. && node $(node -p \"require('./package.json')['main']\")",
     "nodemon": "export NODE_PATH=. && $(npm bin)/nodemon $(node -p \"require('./package.json')['main']\") --ignore 'public/' --ignore 'docs/'",
     "start": "[ \"$ENVIRONMENT\" = \"dev\" ] && yarn nodemon || yarn default",
     "λ": "yarn install && yarn start"
   },
-  "keywords": []
+  "keywords": [],
+  "esdoc": {
+    "source": "./src/",
+    "destination": "./docs/esdoc",
+    "plugins": [{"name": "esdoc-standard-plugin"}]
+  }
 }

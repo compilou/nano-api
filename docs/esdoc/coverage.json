@@ -1,0 +1,175 @@
+{
+  "coverage": "4.95%",
+  "expectCount": 101,
+  "actualCount": 5,
+  "files": {
+    "src/.../index.js": {
+      "expectCount": 9,
+      "actualCount": 0,
+      "undocumentLines": [
+        1,
+        2,
+        4,
+        6,
+        7,
+        9,
+        13,
+        24,
+        28
+      ]
+    },
+    "src/controllers/auth.js": {
+      "expectCount": 13,
+      "actualCount": 0,
+      "undocumentLines": [
+        1,
+        2,
+        3,
+        5,
+        6,
+        7,
+        8,
+        11,
+        13,
+        14,
+        16,
+        22,
+        33
+      ]
+    },
+    "src/controllers/controller.js": {
+      "expectCount": 3,
+      "actualCount": 0,
+      "undocumentLines": [
+        1,
+        3,
+        4
+      ]
+    },
+    "src/controllers/deliberation.js": {
+      "expectCount": 7,
+      "actualCount": 0,
+      "undocumentLines": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ]
+    },
+    "src/controllers/meeting.js": {
+      "expectCount": 12,
+      "actualCount": 3,
+      "undocumentLines": [
+        1,
+        2,
+        3,
+        5,
+        6,
+        7,
+        16,
+        17,
+        18
+      ]
+    },
+    "src/controllers/user.js": {
+      "expectCount": 7,
+      "actualCount": 0,
+      "undocumentLines": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ]
+    },
+    "src/controllers/vote.js": {
+      "expectCount": 7,
+      "actualCount": 0,
+      "undocumentLines": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ]
+    },
+    "src/index.js": {
+      "expectCount": 22,
+      "actualCount": 1,
+      "undocumentLines": [
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        20,
+        24,
+        26,
+        34,
+        48,
+        49,
+        50,
+        65,
+        71,
+        74,
+        88,
+        95,
+        106
+      ]
+    },
+    "src/lib/ACL.js": {
+      "expectCount": 4,
+      "actualCount": 0,
+      "undocumentLines": [
+        1,
+        10,
+        34,
+        51
+      ]
+    },
+    "src/lib/render.js": {
+      "expectCount": 5,
+      "actualCount": 0,
+      "undocumentLines": [
+        2,
+        14,
+        29,
+        35,
+        41
+      ]
+    },
+    "src/model/index.js": {
+      "expectCount": 9,
+      "actualCount": 1,
+      "undocumentLines": [
+        14,
+        16,
+        25,
+        26,
+        27,
+        28,
+        30,
+        42
+      ]
+    },
+    "src/routes.js": {
+      "expectCount": 3,
+      "actualCount": 0,
+      "undocumentLines": [
+        1,
+        2,
+        22
+      ]
+    }
+  }
+}
