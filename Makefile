@@ -75,7 +75,7 @@ install: # Build container.
 
 #
 launch: # Executes application locally
-	@echo $(DOCKER_START) -it -p "80:80" lambdadeveloper/nano-api
+	@$(DOCKER_START) -it -p "80:80" lambdadeveloper/nano-api
 
 launch-cmd: # Executes application locally
 	@$(DOCKER_START) -it -p "80:80" lambdadeveloper/nano-api sh

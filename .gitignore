@@ -1,0 +1,16 @@
+.env.[0-9]*
+.env
+.pid
+.*.error
+report*
+
+**/package-lock.json
+**/yarn.lock
+**/node_modules
+
+.circleci/pre-processed.y*ml
+.circleci/.env
+
+coverage
+.nyc_output
+public/

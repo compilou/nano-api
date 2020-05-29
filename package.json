@@ -6,5 +6,47 @@
   "author": "John Murowaniecki",
   "license": "",
   "private": true,
-  "main": "src/index.js"
+  "main": "src/index.js",
+  "nodemonConfig": {
+    "ignore": [
+      "saved/**"
+    ]
+  },
+  "dependencies": {
+    "cookie-session": "^1.4.0",
+    "mongoose": "^5.9.16",
+    "express": "^4.17.1",
+    "bcrypt": "^4.0.1"
+  },
+  "devDependencies": {
+    "eslint": "^7.1.0",
+    "eslint-config-airbnb-base": "^14.1.0",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-standard": "^4.0.1",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-node": "^11.1.0",
+    "mochawesome": "^6.1.1",
+    "mocha": "^7.2.0",
+    "nodemon": "^1.19.2",
+    "chai-http": "^4.3.0",
+    "chai": "^4.2.0",
+    "nyc": "^15.0.1"
+  },
+  "scripts": {
+    "lint": "eslint ./",
+
+    "test": "mocha ./test/00_config",
+    "test-all": "mocha --recursive",
+    "test-cover": "nyc --all --reporter=lcov --reporter=text mocha --recursive",
+    "test-push": "cc-test-reporter after-build -t lcov",
+    "test-report": "mocha --reporter mochawesome --reporter-options reportDir=./public,reportFilename=index.html,charts=true,showSkipped=true,showHooks=true --recursive",
+
+    "default": "node $(node -p \"require('./package.json')['main']\")",
+    "nodemon": "$(npm bin)/nodemon $(node -p \"require('./package.json')['main']\") --ignore 'public/'",
+    "start": "[ \"$ENVIRONMENT\" = \"dev\" ] && yarn nodemon || yarn default",
+
+    "λ": "yarn install && yarn start"
+  },
+  "keywords": []
 }

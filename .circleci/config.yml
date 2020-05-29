@@ -1,0 +1,259 @@
+version: 2.1
+
+parameters:
+
+  CLI:
+    type: string
+    default: ${CLI}
+
+
+
+executors:
+
+  node-angular:
+    docker:
+      - image: ${DOCKER_USERNAME}/${APP}:latest
+
+
+
+commands:
+
+  setup-versioning:
+    description: "Setup GIT versioning."
+    steps:
+      - when:
+          condition: << pipeline.parameters.CLI >>
+          steps:
+            - run:
+                name: Local build handling.
+                command: |
+                  if [[ ${CIRCLE_SHELL_ENV} =~ "localbuild" ]]
+                  then if [ -d /workdir ]
+                    then ln -s /workdir /tmp/_circleci_local_build_repo
+                    else echo 'Try to execute using `make circleci...` - see `make help` for examples.'
+                        exit 1
+                    fi
+                  fi
+            - checkout
+      - unless:
+          condition: << pipeline.parameters.CLI >>
+          steps:
+            - attach_workspace:
+                at: .
+
+
+
+  docker-login:
+    description: "Performs login on DockerHub"
+    steps:
+      - run:
+          name: Dockerhub authentication.
+          command: |
+            echo -n "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
+
+
+
+  docker-build:
+    description: "Build and push work in progress for APP."
+    parameters:
+      file:
+        type: string
+      description:
+        type: string
+      tag:
+        type: string
+        default: ""
+      namespace:
+        type: string
+        default: ${DOCKER_USERNAME}/${APP}
+    steps:
+      - run:
+          name: << parameters.description >>
+          command: |
+            USETAG=<< parameters.tag >>
+            TARGET=<< parameters.namespace >>
+            [ ! -z ${USETAG} ] && SOURCE=${TARGET}:${USETAG}
+            docker build -t ${SOURCE:-${TARGET}} . -f << parameters.file >>
+            docker push     ${TARGET}:${USETAG:-latest}
+
+
+
+jobs:
+
+  quality:
+    executor: node-angular
+    steps:
+      - checkout
+
+  qa-make:
+    executor: node-angular
+    steps:
+      - checkout
+
+      - restore_cache:
+          key: app-modules-{{ checksum "./package.json" }}
+
+      - run:
+          name: Perform instalations - ensure latest modules.
+          command: yarn install
+
+      - save_cache:
+          key: app-modules-{{ checksum "./package.json" }}
+          paths:
+            - node_modules
+
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+
+
+  qa-lint:
+    executor: node-angular
+    steps:
+      - checkout
+
+      - restore_cache:
+          key: app-modules-{{ checksum "./package.json" }}
+
+      - run:
+          name: Perform Lint
+          command: yarn lint
+
+
+  qa-test:
+    executor: node-angular
+    steps:
+      - checkout
+
+      - restore_cache:
+          key: app-modules-{{ checksum "./package.json" }}
+
+      - run:
+          name: Perform Tests
+          command: yarn enforce-quality
+
+      - run:
+          name: Perform Coverage
+          command: yarn test-cover
+
+
+      - run:
+          name: Send Coverage report
+          command: yarn test-push
+
+      - run:
+          name: Build Awesome Mocha report
+          command: yarn test-report
+
+  build:
+    machine: true
+    steps:
+      - setup-versioning
+
+      - docker-login
+
+      - docker-build:
+          description: Build and push latest TAG for APP.
+          file: ./Dockerfile
+          tag: api
+
+
+
+  deploy-bot:
+    machine: true
+    steps:
+      - setup-versioning
+
+      - run:
+          name: Everything runs on rails, right?! Let's deploy then!
+          command: |
+            npm version patch
+            git push --tags
+
+
+
+  deploy:
+    machine: true
+    steps:
+      - setup-versioning
+
+      - docker-login
+
+      - docker-build:
+          description: Build and push latest TAG for APP.
+          file: ./Dockerfile
+          tag: web
+
+      - unless:
+          condition: << pipeline.parameters.CLI >>
+          steps:
+            - run: |
+                if [[ $(command -v heroku) == "" ]]; then
+                  curl https://cli-assets.heroku.com/install.sh | sh
+                else
+                  echo "Heroku is already installed. No operation was performed."
+                fi
+
+            - run: |
+                  bash .circleci/setup-heroku.sh
+
+      - run:
+          name: Configure Heroku environment and release the deployed container.
+          command: |
+            POOL="registry.heroku.com"
+            LAST="${DOCKER_USERNAME}/${APP}:web"
+            echo "${HEROKU_API_KEY}" | \
+            docker login ${POOL} --username "_" --password-stdin
+            docker tag  "${LAST}" "${POOL}/${HEROKU_APP}/web"
+            docker push "${POOL}/${HEROKU_APP}/web"
+            IMAGE=$(docker inspect "${LAST}" --format={{.Id}})
+            curl --netrc -X PATCH https://api.heroku.com/apps/${HEROKU_APP}/formation \
+              -d '{"updates":[{"type":"web","docker_image":"'${IMAGE}'"}]}' \
+              -H "Content-Type: application/json" \
+              -H "Accept: application/vnd.heroku+json; version=3.docker-releases" \
+              -H "Authorization: Bearer ${HEROKU_API_KEY}"
+
+workflows:
+
+  version: 2.1
+
+  all:
+
+    jobs:
+
+      - qa-make
+
+      - qa-lint:
+          requires:
+            - qa-make
+
+      - qa-test:
+          requires:
+            - qa-make
+
+      - quality:
+          requires:
+            - qa-lint
+            - qa-test
+
+      - build:
+          requires:
+            - quality
+          filters:
+            branches:
+              only: master
+
+      - deploy-bot:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
+
+      - deploy:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v[0-9]+(\.[0-9]+)*$/
