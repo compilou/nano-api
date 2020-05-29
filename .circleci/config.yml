@@ -139,7 +139,7 @@ jobs:
 
       - run:
           name: Perform Tests
-          command: yarn enforce-quality
+          command: yarn test-all
 
       - run:
           name: Perform Coverage
