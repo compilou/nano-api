@@ -1,3 +1,5 @@
+const FS = require('fs');
+
 const {
   expect
 } = require('./../../src/...');
@@ -64,5 +66,18 @@ const RESOURCE_TYPES = {
     });
 
     'Finaliza aplicação'
-      .test((done) => Application.shutdown('closing tests', () => done()));
+      .test((done) => {
+        const [whenActivePID] = [FS.existsSync('.pid')];
+        expect(whenActivePID, 'O sistema está ativo').to.be.true;
+
+        Application.shutdown('closing tests', () => {
+          const inactivePID = ((FS.existsSync('.pid')));
+
+          expect(whenActivePID, 'O sistema está desligando').to.not.be.equals(inactivePID);
+          if (whenActivePID === inactivePID) {
+            return done(new Error('Arquivo .pid existe - deveria ter sido deletado.'));
+          }
+          done();
+        });
+      });
   });

@@ -29,7 +29,7 @@ const CPFs = Array(10)
 
     'Endpoint conectado'
       .test((next) => Plug
-        .get('/')
+        .head('/')
         .end((error, response) => {
           if (error) {
             return next(new Error(error));
