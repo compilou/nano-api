@@ -34,7 +34,15 @@ commands:
                         exit 1
                     fi
                   fi
+
             - checkout
+
+            - run:
+                name: Configure identity
+                command: |
+                  git config --global user.email "service@compilou.com.br"
+                  git config --global user.name "Bøt"
+
       - unless:
           condition: << pipeline.parameters.CLI >>
           steps:
