@@ -1,8 +1,9 @@
-const Router = require('../../src/routes');
-const {
-  // λ,
-  // expect
-} = require('src/...');
+// const Router = require('../../src/routes');
+// const {
+//   λ,
+//   expect
+// } =
+require('src/...');
 
 'Valida Router.'
   .testList(function () {
