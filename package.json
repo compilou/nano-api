@@ -22,6 +22,9 @@
   "devDependencies": {
     "chai": "^4.2.0",
     "chai-http": "^4.3.0",
+    "documentation": "^13.0.0",
+    "esdoc": "^1.1.0",
+    "esdoc-standard-plugin": "^1.0.0",
     "eslint": "^7.1.0",
     "eslint-config-airbnb-base": "^14.1.0",
     "eslint-config-standard": "^14.1.1",
@@ -35,14 +38,16 @@
     "nyc": "^15.0.1"
   },
   "scripts": {
-    "lint": "eslint ./",
+    "doc": "export NODE_PATH=. && esdoc && test-cover && test-report",
+    "doc-gen": "documentation build src/** -f html -o docs/API/",
+    "lint": "export NODE_PATH=. && eslint ./",
     "test": "export NODE_PATH=. && mocha",
     "test-all": "yarn test --recursive",
-    "test-cover": "export NODE_PATH=. && nyc --all --reporter=lcov --reporter=text mocha --recursive",
     "test-push": "export NODE_PATH=. && cc-test-reporter after-build -t lcov",
-    "test-report": "export NODE_PATH=. && mocha --reporter mochawesome --reporter-options reportDir=./public,reportFilename=index.html,charts=true,showSkipped=true,showHooks=true --recursive",
+    "test-cover": "export NODE_PATH=. && nyc --all --reporter=lcov --reporter=text mocha --recursive --exclude public,docs",
+    "test-report": "export NODE_PATH=. ; mocha --reporter mochawesome --reporter-options reportDir=./docs/mocha,reportFilename=index.html,charts=true,showSkipped=true,showHooks=true --recursive",
     "default": "export NODE_PATH=. && node $(node -p \"require('./package.json')['main']\")",
-    "nodemon": "export NODE_PATH=. && $(npm bin)/nodemon $(node -p \"require('./package.json')['main']\") --ignore 'public/'",
+    "nodemon": "export NODE_PATH=. && $(npm bin)/nodemon $(node -p \"require('./package.json')['main']\") --ignore 'public/' --ignore 'docs/'",
     "start": "[ \"$ENVIRONMENT\" = \"dev\" ] && yarn nodemon || yarn default",
     "λ": "yarn install && yarn start"
   },

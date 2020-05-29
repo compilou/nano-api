@@ -13,7 +13,7 @@ const SocketIO = require('socket.io');
 const Express = require('express');
 const Cluster = require('cluster');
 const Routes = require('./routes');
-const { ƒ } = require('...');
+const { ƒ } = require('src/.../index');
 const FS = require('fs');
 const OS = require('os');
 

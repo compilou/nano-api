@@ -34,18 +34,15 @@ class Meeting extends Controller {
       }
       const posted = req.body;
       posted.createdAt = new Date();
-      // posted.deliberations.forEach((e) => {
-      //   e.createdAt = new Date();
-      // });
+      posted.deliberations.forEach((e) => {
+        e.createdAt = new Date();
+      });
 
       console.log(posted,'mtfck');
 
       saveOne(Model.Meeting, posted)
-        .then((saved) => {
-          console.log('veio antes de qqr coisa?', saved)
-        })
-        .then((saved) => Render(res, `Cadastro de assembléia realizado para ${saved.title}.`, 201, posted))
-        .catch((erro) => console.log('>>>>', erro) && Render(res, `Falha ao cadastrar ${posted.title}.`, 500, [erro, posted, erro]))
+        .then((saved) => Render(res, `Cadastro de assembléia realizado para "${posted.title}".`, 201, saved))
+        .catch((erro) => console.log('>>>>', erro) && Render(res, `Falha ao cadastrar "${posted.title}".`, 500, [erro, posted, erro]))
         .finally((ok) => {
           console.log('ok', ok);
         });

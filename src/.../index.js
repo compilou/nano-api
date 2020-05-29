@@ -34,7 +34,6 @@ String.prototype.testList = function(callback) {
 }
 
 
-
 Chai.use(httpChai);
 
 
@@ -60,6 +59,6 @@ module.exports = {
 
   ƒ: (ħ) => ({ do: (Ł) => Ł(ħ) }),
 
-  killSwitch: () => setTimeout(() => process.exit(1), 15000),
+  killSwitch: () => setTimeout(() => process.exit(1), 500000),
 
 };

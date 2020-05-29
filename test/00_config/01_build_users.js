@@ -1,5 +1,4 @@
 const {
-  killSwitch,
   passwordMaker,
 } = require('../../src/...');
 
@@ -51,7 +50,7 @@ const {
         const STALL = (new Date()).getTime() + 5000;
 
         this.interval = setInterval(() => {
-          const isStalled = (new Date()).getTime() - STALL ;
+          const isStalled = (new Date()).getTime() - STALL;
           if (this.finished || isStalled > 0) {
             clearInterval(this.interval);
 
@@ -69,6 +68,4 @@ const {
           process.stdout.write('.');
         }, 100);
       }, 10000);
-
-    killSwitch();
   });

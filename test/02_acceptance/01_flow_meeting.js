@@ -86,14 +86,12 @@ const User = SandboxUsers[0];
           ]
         })
         .end((error, response) => {
-          console.log('asdf', error, response);
           if (error) {
             return next(new Error(error));
           }
           expect(response.statusCode).to.equal(201);
-          console.log('>>>', response.body);
           next();
-        }));
+        }), 5000);
 
     'Lista assembléias'
       .test((next) => Plug
@@ -103,7 +101,6 @@ const User = SandboxUsers[0];
             return next(new Error(error));
           }
           expect(response.statusCode).to.equal(200);
-          console.log('icarus', response.body);
           next();
         }));
 
