@@ -48,7 +48,7 @@ class Meeting extends Controller {
             `Removendo ${users.deletedCount} usuario${users.deletedCount > 1 ? 's' : ''}..`,
             error ? 404 : 202,
           ];
-          render(res, text, code);
+          Render(res, text, code);
         })
         .deleteMany(req.body, (error) => {
           console.log(error ? 'Houveram erros.' : 'Com sucesso.', req.body);
