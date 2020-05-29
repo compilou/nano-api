@@ -73,9 +73,12 @@ install: # Build container.
 	@docker build --force-rm -t lambdadeveloper/nano-api . -f ./Dockerfile
 
 clean: # Remove dependencies.
-	@$(DOCKER_START) -it lambdadeveloper/nano-api     \
-		rm -Rf node_modules .nyc_output .pid report.* \
-		coverage public/* .circleci/pre-processed.yml
+	@$(DOCKER_START) -it lambdadeveloper/nano-api \
+		rm -Rf .circleci/pre-processed.yml ./docs \
+		./node_modules ./coverage ./report.* .pid \
+		.nyc_output ./public/*
+
+
 
 
 #
