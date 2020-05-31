@@ -1,4 +1,4 @@
-const FS = require('fs');
+// const FS = require('fs');
 
 const {
   expect
@@ -67,7 +67,7 @@ const RESOURCE_TYPES = {
 
     'Finaliza aplicação'
       .test((done) => {
-        const [whenActivePID] = [FS.existsSync('.pid')];
+        // const [whenActivePID] = [FS.existsSync('.pid')];
         // expect(whenActivePID, 'O sistema está ativo').to.be.true;
 
         Application.shutdown('closing tests', () => {
