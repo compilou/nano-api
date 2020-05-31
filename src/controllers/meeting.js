@@ -93,7 +93,7 @@ class Meeting extends Controller {
         }
       });
 
-      console.log('filte', filter)
+      console.log('filte', filter);
 
       Model.Meeting
         .find(filter)

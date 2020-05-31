@@ -10,7 +10,7 @@ const {
 } = require('../../src/lib/utils');
 
 const {
-  APP_URL,
+  APP_URL = 'http://localhost',
   PORT = 80,
 } = process.env;
 

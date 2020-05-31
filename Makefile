@@ -99,6 +99,12 @@ circleci-pre-process:  #- Preprocess CircleCI config file to run locally.
 circleci-qa: circleci-pre-process #- Runs CircleCI quality workflow locally.
 	@$(CIRCLECI_RUN) --job quality
 
+circleci-qa-lint: circleci-pre-process #- Runs CircleCI quality workflow locally.
+	@$(CIRCLECI_RUN) --job qa-lint
+
+circleci-qa-test: circleci-pre-process #- Runs CircleCI quality workflow locally.
+	@$(CIRCLECI_RUN) --job qa-test
+
 circleci-build: circleci-pre-process
 	@$(CIRCLECI_RUN) --job build
 

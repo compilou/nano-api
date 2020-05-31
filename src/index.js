@@ -51,7 +51,7 @@ class μ {
    * @param {any|array|object} arg Object(s) with configurations:
    *  {
    *    DEBUG {boolean} Shows common output for main processes.
-   *    FAKE  {boolean} Doesn't start services (only fake it).
+   *    UNITE {boolean} Doesn't kill existant services (only UNITE it).
    *    PORT  {number}  Port number for express/http application.
    *  }
    *
@@ -60,7 +60,7 @@ class μ {
   constructor(...arg) {
     this.config = {
       DEBUG: false,
-      FAKE: false,
+      UNITE: false,
       PORT: PORT,
     };
 
@@ -74,12 +74,12 @@ class μ {
     this.daemon = [
       this.constructor.name,
       ['Worker', 'Master'][Cluster.isMaster+0],
-      this.config.FAKE ? 'fake' : null
+      this.config.UNITE ? '+' : null
     ].filter(i => i).join('.');
 
     process.title = this.daemon;
 
-    if (!this.config.FAKE) {
+    if (!this.config.UNITE) {
       let isRunning = this.isRunning();
       if (isRunning) {
         try {
@@ -96,7 +96,7 @@ class μ {
 
 
   isRunning() {
-    if (this.config.FAKE) {
+    if (this.config.UNITE) {
       return process.pid;
     }
     return FS.existsSync('.pid') ? FS.readFileSync('.pid') : false;
@@ -119,22 +119,16 @@ class μ {
         RAM: ƒ(OS.freemem()).do((e) => [parseInt(e / (1024 ** 2), 10), 'MB']),
       })));
 
-    if (this.config.FAKE) {
-      this.Gateway = this.Server.listen();
-      this.Notifier = SocketIO(this.Gateway);
-    }
-    else {
-      this.Gateway = this.Server.listen(
-        this.config.PORT,
-        () => {
-          this.log([process.title, process.pid], 'using port:', this.config.PORT, 'on', this.Endpoints());
-        });
+    this.Gateway = this.Server.listen(
+      this.config.PORT,
+      () => {
+        this.log([process.title, process.pid], 'using port:', this.config.PORT, 'on', this.Endpoints());
+      });
 
-      this.Notifier = SocketIO(this.Gateway);
+    this.Notifier = SocketIO(this.Gateway);
 
-      if (typeof callback === 'function') {
-        callback(this);
-      }
+    if (typeof callback === 'function') {
+      callback(this);
     }
 
     return this;
@@ -164,7 +158,6 @@ if (module !== require.main) {
   module.exports = μ;
 }
 else {
-
   const Application = new μ({
     DEBUG: true,
   }).start();

@@ -46,7 +46,7 @@ class Auth extends Controller {
           return Render(res, `Falha ao localizar '${req.body.username}'.`, 403);
         }
         if (!(auth.username && auth.password)) {
-          return Render(res, `Efetue login.`, 200);
+          return Render(res, 'Efetue login.', 200);
         }
 
         const user = req.body;

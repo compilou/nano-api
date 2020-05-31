@@ -30,7 +30,7 @@ const RESOURCE_TYPES = {
       });
 
     context('Inicializa aplicação e carrega recursos', function () {
-      Application = (new APP({ PORT: 666 }))
+      Application = (new APP({ PORT: 666, UNITE: true }))
         .start((App) => {
           Object.keys(App).forEach((resource) => {
             `Recurso ${resource} carregado`.test((done) => {
@@ -71,12 +71,6 @@ const RESOURCE_TYPES = {
         expect(whenActivePID, 'O sistema está ativo').to.be.true;
 
         Application.shutdown('closing tests', () => {
-          const inactivePID = ((FS.existsSync('.pid')));
-
-          expect(whenActivePID, 'O sistema está desligando').to.not.be.equals(inactivePID);
-          if (whenActivePID === inactivePID) {
-            return done(new Error('Arquivo .pid existe - deveria ter sido deletado.'));
-          }
           done();
         });
       });
