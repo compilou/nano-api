@@ -23,6 +23,16 @@ const {
 } = process.env;
 
 class ORM {
+
+  /**
+   * Creates an instance of ORM self injecting Mongoose.
+   *
+   * @author John Murowaniecki <john@compilou.com.br>
+   *
+   * @param {Array} Array of strings - models files.
+   *
+   * @memberof ORM
+   */
   constructor (models) {
     this.Models = {};
     this.Schema = {};

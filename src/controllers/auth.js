@@ -21,6 +21,7 @@ class Auth extends Controller {
 
   delete(req, res) {
     return ACL(req.session, res, ((allow) => {
+      // console.log(req.session)
       const user = req.session.session.fullname;
       if (allow) {
         ClearSession(req, req.session.session, this);
@@ -41,10 +42,11 @@ class Auth extends Controller {
         : Render(res, `Usuário ${found.username} ou senha incorretos.`, 403, [found, req.body]))
 
       .catch((error) => {
-        console.log('ops', error, auth);
-
         if (((error && error.found !== null)) || !SandboxCPF(req.body.username)) {
           return Render(res, `Falha ao localizar '${req.body.username}'.`, 403);
+        }
+        if (!(auth.username && auth.password)) {
+          return Render(res, 'Efetue login.', 200);
         }
 
         const user = req.body;

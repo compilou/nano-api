@@ -73,9 +73,12 @@ install: # Build container.
 	@docker build --force-rm -t lambdadeveloper/nano-api . -f ./Dockerfile
 
 clean: # Remove dependencies.
-	@$(DOCKER_START) -it lambdadeveloper/nano-api     \
-		rm -Rf node_modules .nyc_output .pid report.* \
-		coverage public/* .circleci/pre-processed.yml
+	@$(DOCKER_START) -it lambdadeveloper/nano-api \
+		rm -Rf .circleci/pre-processed.yml ./docs \
+		./node_modules ./coverage ./report.* .pid \
+		.nyc_output ./public/*
+
+
 
 
 #
@@ -95,6 +98,12 @@ circleci-pre-process:  #- Preprocess CircleCI config file to run locally.
 
 circleci-qa: circleci-pre-process #- Runs CircleCI quality workflow locally.
 	@$(CIRCLECI_RUN) --job quality
+
+circleci-qa-lint: circleci-pre-process #- Runs CircleCI quality workflow locally.
+	@$(CIRCLECI_RUN) --job qa-lint
+
+circleci-qa-test: circleci-pre-process #- Runs CircleCI quality workflow locally.
+	@$(CIRCLECI_RUN) --job qa-test
 
 circleci-build: circleci-pre-process
 	@$(CIRCLECI_RUN) --job build

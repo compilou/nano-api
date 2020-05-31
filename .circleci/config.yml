@@ -125,6 +125,10 @@ jobs:
           key: app-modules-{{ checksum "./package.json" }}
 
       - run:
+          name: Prepare dependencies
+          command: yarn install
+
+      - run:
           name: Perform Lint
           command: yarn lint
 
@@ -138,21 +142,14 @@ jobs:
           key: app-modules-{{ checksum "./package.json" }}
 
       - run:
-          name: Perform Tests
-          command: yarn test-all
+          name: Prepare dependencies
+          command: yarn install
 
       - run:
-          name: Perform Coverage
-          command: yarn test-cover
-
-
-      - run:
-          name: Send Coverage report
-          command: yarn test-push
-
-      - run:
-          name: Build Awesome Mocha report
-          command: yarn test-report
+          name: Start server and perform Tests
+          command: |
+            yarn default&
+            yarn test
 
   build:
     machine: true

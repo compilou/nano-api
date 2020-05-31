@@ -17,6 +17,7 @@ const { ƒ } = require('src/.../index');
 const FS = require('fs');
 const OS = require('os');
 
+
 const {
   PORT = 80,
 } = process.env;
@@ -44,11 +45,22 @@ class μ {
   }
 
 
-
+  /**
+   * Creates an instance of μ // Nano-API.
+   *
+   * @param {any|array|object} arg Object(s) with configurations:
+   *  {
+   *    DEBUG {boolean} Shows common output for main processes.
+   *    UNITE {boolean} Doesn't kill existant services (only UNITE it).
+   *    PORT  {number}  Port number for express/http application.
+   *  }
+   *
+   * @memberOf μ
+   */
   constructor(...arg) {
-    this.Cluster = Cluster;
     this.config = {
       DEBUG: false,
+      UNITE: false,
       PORT: PORT,
     };
 
@@ -58,19 +70,41 @@ class μ {
           .forEach(((config) => (this.config[config] = configs[config])));
       }
     });
+
+    this.daemon = [
+      this.constructor.name,
+      ['Worker', 'Master'][Cluster.isMaster+0],
+      this.config.UNITE ? '+' : null
+    ].filter(i => i).join('.');
+
+    process.title = this.daemon;
+
+    if (!this.config.UNITE) {
+      let isRunning = this.isRunning();
+      if (isRunning) {
+        try {
+          process.kill(isRunning, 9);
+          this.log('Killed', isRunning);
+        } catch (error) {
+          this.log('Can`t kill', isRunning);
+        }
+      }
+      FS.writeFileSync('.pid', process.pid);
+    }
   }
 
 
 
   isRunning() {
-    return FS.existsSync('.pid');
+    if (this.config.UNITE) {
+      return process.pid;
+    }
+    return FS.existsSync('.pid') ? FS.readFileSync('.pid') : false;
   }
 
 
 
   start(callback) {
-    FS.writeFileSync('.pid', process.pid);
-
     this.Server = Express();
     this.Server
       .use(Express.json())
@@ -88,7 +122,6 @@ class μ {
     this.Gateway = this.Server.listen(
       this.config.PORT,
       () => {
-        process.title = `μ.${['Worker', 'Master'][this.Cluster.isMaster + 0]}`;
         this.log([process.title, process.pid], 'using port:', this.config.PORT, 'on', this.Endpoints());
       });
 
@@ -106,13 +139,15 @@ class μ {
   shutdown(description, callback) {
     this.isRunning() && FS.unlinkSync('.pid');
     this.log('Preparing to shutdown', [process.title, description || '']);
-
+    this.Gateway.removeAllListeners();
     this.Gateway.close();
+    this.Gateway.unref();
 
     setTimeout(() => {
       if (callback && typeof callback === 'function') {
         callback.call(this);
       }
+      setTimeout(() => process.exit(0), 42000);
     }, 666);
   }
 }
@@ -124,7 +159,7 @@ if (module !== require.main) {
 }
 else {
   const Application = new μ({
-    DEBUG: false,
+    DEBUG: true,
   }).start();
 
   // ['exit', 'SIGINT', 'SIGUSR1', 'SIGUSR2', 'SIGTERM' , 'uncaughtException']
@@ -150,11 +185,11 @@ else {
 
   Application.Server.ACTIVE_USERS = [];
 
-  Routes(Application.Server, Controllers);
+  Routes(Application, Controllers);
+
 
   setInterval(() => {
-    Application.Server.emit('ping', '1');
-    console.log('Users', Application.Server.ACTIVE_USERS);
-  }, 3000);
+    Application.log('Active users', Application.Server.ACTIVE_USERS);
+  }, 1000);
 
 }

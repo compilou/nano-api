@@ -23,7 +23,6 @@
     "chai": "^4.2.0",
     "chai-http": "^4.3.0",
     "documentation": "^13.0.0",
-    "doxygen": "^0.3.2",
     "esdoc": "^1.1.0",
     "esdoc-standard-plugin": "^1.0.0",
     "eslint": "^7.1.0",
@@ -60,6 +59,10 @@
   "esdoc": {
     "source": "./src/",
     "destination": "./docs/esdoc",
-    "plugins": [{"name": "esdoc-standard-plugin"}]
+    "plugins": [
+      {
+        "name": "esdoc-standard-plugin"
+      }
+    ]
   }
 }

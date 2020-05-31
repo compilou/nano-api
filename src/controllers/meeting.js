@@ -76,13 +76,31 @@ class Meeting extends Controller {
       if (!allow) {
         return RENDER_UNPRIVILEDGED(res);
       }
+      const filter = {};
+      const fields = {
+        sheduled: (d) => {
+          const e = (new Date(d));
+          return {
+            $gte: e,
+            $lte: new Date(new Date(d).setDate(e.getDate()+1))
+          };
+        }
+      };
+
+      Object.keys(req.body).forEach((field) => {
+        if (field in fields) {
+          filter[field] = fields[field](req.body[field]);
+        }
+      });
+
+      console.log('filte', filter);
+
       Model.Meeting
-        .find(req.body)
-        .sort('-id')
+        .find(filter)
         .limit(42)
         .exec((err, meetings) => err
           ? Render(res, 'Ocorreu um erro durante a listagem de assembléias.', 517, [err, meetings])
-          : Render(res, meetings || []));
+          : Render(res, meetings || [], 200, meetings));
     });
   }
 

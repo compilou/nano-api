@@ -2,8 +2,6 @@ class Controller {
 
   constructor() {
     this.ALOWED_METHODS = ['post', 'put', 'get', 'patch', 'delete', 'head', 'connect', 'options', 'trace'];
-
-    console.log('constructed', this);
   }
 
   // get(req, res) { console.log('de', res.json(['devil', this.customPath])); }

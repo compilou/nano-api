@@ -6,7 +6,7 @@ const {
 const Mongoose = require('mongoose');
 const ENV_FILES = ['.env', '.env.template'];
 const {
-  APP_URL
+  APP_URL = 'http://localhost'
 } = process.env;
 
 
@@ -43,7 +43,7 @@ const {
 
 
     'Variáveis de ambiente corretas para o MongoDB'
-      .skippable((next) => {
+      .test((next) => {
         const {
           MONGODB_URL = process.env.MONGODB_RESOURCE,
           MONGODB_CFG = {
@@ -57,10 +57,12 @@ const {
           if (err) {
             return next(new Error('Não foi possível conectar no MongoDB utilizando as credenciais informadas.'));
           }
-          Mongoose.disconnect();
-          next();
+        }).then(() => {
+          Mongoose.disconnect().then(() => {
+            next();
+          });
         });
-      });
+      }, 5000);
   });
 
 
