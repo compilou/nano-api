@@ -7,6 +7,17 @@ const { Render, RENDER_UNPRIVILEDGED } = require('../lib/render');
 const { ACL, UpdateSession, ClearSession } = require('../lib/ACL');
 const { SandboxCPF, findOne, saveOne } = require('../lib/utils');
 
+const createUserFrom = (source) => {
+  const user = source.body;
+  user.createdAt = new Date();
+  user.fullname = (user.username || '');
+  user.username = (user.username || '').replace(/[^0-9]/g, '');
+  user.active = true;
+  user.admin = false;
+  user.dummy = source.header('IS-DUMMY');
+
+  return user;
+};
 
 class Auth extends Controller {
 
@@ -34,13 +45,11 @@ class Auth extends Controller {
   post(req, res) {
     const auth = req.body;
     const UserCollection = Model.User;
-    const UserAPI = findOne(UserCollection);
 
-    UserAPI({ username: auth.username })
+    findOne(UserCollection)({ username: auth.username })
       .then((found) => passwordMatch(req.body.password, found.password)
         ? (UpdateSession(req, found, this) && Render(res, `Bem vindo, ${found.fullname}.`, 200, found))
         : Render(res, `Usuário ${found.username} ou senha incorretos.`, 403, [found, req.body]))
-
       .catch((error) => {
         if (((error && error.found !== null)) || !SandboxCPF(req.body.username)) {
           return Render(res, `Falha ao localizar '${req.body.username}'.`, 403);
@@ -48,16 +57,9 @@ class Auth extends Controller {
         if (!(auth.username && auth.password)) {
           return Render(res, 'Efetue login.', 200);
         }
+        const user = createUserFrom(req);
 
-        const user = req.body;
-        user.createdAt = new Date();
-        user.fullname = user.username;
-        user.username = user.username.replace(/[^0-9]/g, '');
-        user.active = true;
-        user.admin = false;
-        user.dummy = req.header('IS-DUMMY');
-
-        return UserAPI({ username: user.username }, { username: user.username })
+        return findOne(UserCollection)({ username: user.username }, { username: user.username })
           .then((found) => Render(res, `Cadastro localizado: ${found.fullname}.`, 309))
           .catch(() => {
             user.password = passwordMaker(user.password);

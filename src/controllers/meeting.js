@@ -78,13 +78,10 @@ class Meeting extends Controller {
       }
       const filter = {};
       const fields = {
-        sheduled: (d) => {
-          const e = (new Date(d));
-          return {
-            $gte: e,
-            $lte: new Date(new Date(d).setDate(e.getDate()+1))
-          };
-        }
+        sheduled: (d, e) => (e = new Date(d), {
+          $gte: e,
+          $lte: new Date(new Date(d).setDate(e.getDate()+1))
+        })
       };
 
       Object.keys(req.body).forEach((field) => {
@@ -92,8 +89,6 @@ class Meeting extends Controller {
           filter[field] = fields[field](req.body[field]);
         }
       });
-
-      console.log('filte', filter);
 
       Model.Meeting
         .find(filter)

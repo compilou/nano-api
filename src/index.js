@@ -79,6 +79,12 @@ class μ {
 
     process.title = this.daemon;
 
+    this.handlePID();
+  }
+
+
+
+  handlePID() {
     if (!this.config.UNITE) {
       let isRunning = this.isRunning();
       if (isRunning) {
@@ -86,7 +92,7 @@ class μ {
           process.kill(isRunning, 9);
           this.log('Killed', isRunning);
         } catch (error) {
-          this.log('Can`t kill', isRunning);
+          this.log('Can`t kill', isRunning, error);
         }
       }
       FS.writeFileSync('.pid', process.pid);
