@@ -174,8 +174,6 @@ jobs:
           name: Everything runs on rails, right?! Let's deploy then!
           command: |
             npm version patch
-            git commit package.json -m ':robot: version updated'
-            git push orign master --tags
 
 
 
