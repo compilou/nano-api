@@ -28,7 +28,6 @@ const User = SandboxUsers[0];
   .testList(function () {
 
     before(function (done) {
-
       this.retries(3);
       this.timeout(5000);
 
@@ -41,6 +40,20 @@ const User = SandboxUsers[0];
           }
           expect(response.statusCode).to.equal(200);
           expect(response).to.have.cookie('session');
+          done();
+        });
+    });
+
+    after(function (done) {
+      this.timeout(5000);
+      Plug
+        .post('/auth')
+        .send({})
+        .end((error, response) => {
+          if (error) {
+            return done(new Error(error));
+          }
+          expect(response.statusCode).to.equal(200);
           done();
         });
     });
@@ -67,7 +80,7 @@ const User = SandboxUsers[0];
           next();
         }));
 
-    'Publica nova assembléia'
+    'Publica nova assembléia para agora'
       .test((next) => Plug
         .post('/meeting')
         .send({
@@ -93,13 +106,36 @@ const User = SandboxUsers[0];
           next();
         }), 5000);
 
-    'Lista assembléias'
+    'Publica nova assembléia para amanhã'
       .test((next) => Plug
-        .get('/meeting')
+        .post('/meeting')
+        .send({
+          title: 'Assembléia Geral Extraordinária de teste pra amanhã',
+          description: 'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Amet reprehenderit autem, asperiores odio temporibus corporis quasi facere et? Nihil doloremque obcaecati, quibusdam quaerat dolor beatae sapiente optio modi similique quas.',
+          sheduled: new Date((new Date()).setDate((new Date()).getDate()+1)),
+          notify: true,
+          status: true,
+          time: '20:00',
+          call: '19:00',
+          deliberations: []
+        })
         .end((error, response) => {
           if (error) {
             return next(new Error(error));
           }
+          expect(response.statusCode).to.equal(201);
+          next();
+        }), 5000);
+
+    'Lista apenas assembléias do dia seguinte'
+      .test((next) => Plug
+        .get('/meeting')
+        .send({sheduled: new Date((new Date()).setDate((new Date()).getDate()+1)).toLocaleDateString()})
+        .end((error, response) => {
+          if (error) {
+            return next(new Error(error));
+          }
+          console.log('exect at least 1', response.body);
           expect(response.statusCode).to.equal(200);
           next();
         }));

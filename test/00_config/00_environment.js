@@ -56,11 +56,16 @@ const {
         Mongoose.connect(MONGODB_URL, MONGODB_CFG, (err) => {
           if (err) {
             return next(new Error('Não foi possível conectar no MongoDB utilizando as credenciais informadas.'));
-          }
-          Mongoose.disconnect();
-          next();
+          };
+        }).then(() => {
+          Mongoose.disconnect().then((done, fail) => {
+            // Mongoose.disconnect();
+            // Mongoose.connection.close();
+            // console.log(Mongoose.Connection.STATES, Mongoose.connection);
+            next();
+          });
         });
-      });
+      }, 5000);
   });
 
 

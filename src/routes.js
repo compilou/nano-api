@@ -1,10 +1,11 @@
 class ROUTES {
-  constructor (Server, routes) {
+  constructor (Application, routes) {
     const ALLOWED_VERBS = ['post', 'put', 'get', 'patch', 'delete', 'head', 'connect', 'options', 'trace'];
-    console.log('deu perda');
+    const Server = Application.Server;
+
+    this.log = (...msg) => Application.log(...msg);
 
     Object.keys(routes).forEach(route => {
-      console.log('>', route);
       const path = route;
       const ROUTE = routes[route];
       const routing = new ROUTE();
@@ -14,15 +15,15 @@ class ROUTES {
         .filter(((verb) => ALLOWED_VERBS.indexOf(String(verb)) >= 0))
         .forEach((verb) => {
           Server[(verb)](`/${path}`, routing[verb].bind(Server));
-          console.log(`Adding route /${path}`, routing[verb]);
+          this.log(`Adding method ${routing[verb].name.toUpperCase()} to /${path}`);
         });
     });
   }
 
   notFound (req, res, next) {
-    console.log(req);
+    this.log(req);
     res.json(next);
   }
 }
 
-module.exports = (server, routes) => new ROUTES(server, routes);
+module.exports = (Application, routes) => new ROUTES(Application, routes);

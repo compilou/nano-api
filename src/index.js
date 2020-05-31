@@ -17,7 +17,6 @@ const { ƒ } = require('src/.../index');
 const FS = require('fs');
 const OS = require('os');
 
-const IPC = require('node-ipc');
 
 const {
   PORT = 80,
@@ -46,13 +45,22 @@ class μ {
   }
 
 
-
+  /**
+   * Creates an instance of μ // Nano-API.
+   *
+   * @param {any|array|object} arg Object(s) with configurations:
+   *  {
+   *    DEBUG {boolean} Shows common output for main processes.
+   *    FAKE  {boolean} Doesn't start services (only fake it).
+   *    PORT  {number}  Port number for express/http application.
+   *  }
+   *
+   * @memberOf μ
+   */
   constructor(...arg) {
-    const hierarchy = ['Worker', 'Master'][Cluster.isMaster+0];
-    this.daemon = this.constructor.name.concat('.', hierarchy);
-    this.thread = this.handleIPC(Cluster);
     this.config = {
       DEBUG: false,
+      FAKE: false,
       PORT: PORT,
     };
 
@@ -62,39 +70,41 @@ class μ {
           .forEach(((config) => (this.config[config] = configs[config])));
       }
     });
-  }
 
+    this.daemon = [
+      this.constructor.name,
+      ['Worker', 'Master'][Cluster.isMaster+0],
+      this.config.FAKE ? 'fake' : null
+    ].filter(i => i).join('.');
 
-  handleIPC(Cluster) {
-    process.title = `${this.daemon}...`;
-    Object.assign(IPC.config, {
-      id: `${this.daemon}...`,
-      retry: 1500,
-      silent: true
-    });
-    IPC.connectTo(this.daemon, () => {
-      IPC.of['jest-observer'].on('connect', () => {
-        IPC.of['jest-observer'].emit('beam', 'die');
-        IPC.serve(() => IPC.server.on(this.daemon, (signal) => {
-          console.log('signal received:', signal);
-          process.exit(0);
-        }));
-        IPC.server.start();
-      });
-    });
+    process.title = this.daemon;
+
+    if (!this.config.FAKE) {
+      let isRunning = this.isRunning();
+      if (isRunning) {
+        try {
+          process.kill(isRunning, 9);
+          this.log('Killed', isRunning);
+        } catch (error) {
+          this.log('Can`t kill', isRunning);
+        }
+      }
+      FS.writeFileSync('.pid', process.pid);
+    }
   }
 
 
 
   isRunning() {
-    return FS.existsSync('.pid');
+    if (this.config.FAKE) {
+      return process.pid;
+    }
+    return FS.existsSync('.pid') ? FS.readFileSync('.pid') : false;
   }
 
 
 
   start(callback) {
-    FS.writeFileSync('.pid', process.pid);
-
     this.Server = Express();
     this.Server
       .use(Express.json())
@@ -109,16 +119,22 @@ class μ {
         RAM: ƒ(OS.freemem()).do((e) => [parseInt(e / (1024 ** 2), 10), 'MB']),
       })));
 
-    this.Gateway = this.Server.listen(
-      this.config.PORT,
-      () => {
-        this.log([process.title, process.pid], 'using port:', this.config.PORT, 'on', this.Endpoints());
-      });
+    if (this.config.FAKE) {
+      this.Gateway = this.Server.listen();
+      this.Notifier = SocketIO(this.Gateway);
+    }
+    else {
+      this.Gateway = this.Server.listen(
+        this.config.PORT,
+        () => {
+          this.log([process.title, process.pid], 'using port:', this.config.PORT, 'on', this.Endpoints());
+        });
 
-    this.Notifier = SocketIO(this.Gateway);
+      this.Notifier = SocketIO(this.Gateway);
 
-    if (typeof callback === 'function') {
-      callback(this);
+      if (typeof callback === 'function') {
+        callback(this);
+      }
     }
 
     return this;
@@ -129,13 +145,15 @@ class μ {
   shutdown(description, callback) {
     this.isRunning() && FS.unlinkSync('.pid');
     this.log('Preparing to shutdown', [process.title, description || '']);
-
+    this.Gateway.removeAllListeners();
     this.Gateway.close();
+    this.Gateway.unref();
 
     setTimeout(() => {
       if (callback && typeof callback === 'function') {
         callback.call(this);
       }
+      setTimeout(() => process.exit(0), 42000);
     }, 666);
   }
 }
@@ -148,28 +166,11 @@ if (module !== require.main) {
 else {
 
   const Application = new μ({
-    DEBUG: false,
+    DEBUG: true,
   }).start();
 
-  ['exit', 'SIGINT', 'SIGUSR1', 'SIGUSR2', 'SIGTERM' , 'uncaughtException']
-    .forEach((event) => process.on(event, () => Application.shutdown(event)));
-
-
-
-  process.argv.forEach((arg) => {
-    switch (arg) {
-      case 'bend':
-
-        Application.Server.emit('request', 'bend');
-        process.exit(0);
-        break;
-
-      default:
-        console.log('arg', arg);
-        break;
-    }
-  });
-
+  // ['exit', 'SIGINT', 'SIGUSR1', 'SIGUSR2', 'SIGTERM' , 'uncaughtException']
+  //   .forEach((event) => process.on(event, () => Application.shutdown(event)));
 
   Application
     .Server
@@ -191,16 +192,11 @@ else {
 
   Application.Server.ACTIVE_USERS = [];
 
-  Routes(Application.Server, Controllers);
+  Routes(Application, Controllers);
 
-
-  Application.Server.on('request', (request) => {
-    console.log('do it', request);
-  });
 
   setInterval(() => {
-    Application.Server.emit('ping', '1');
-    console.log('Users', Application.Server.ACTIVE_USERS);
-  }, 3000);
+    Application.log('Active users', Application.Server.ACTIVE_USERS);
+  }, 1000);
 
 }

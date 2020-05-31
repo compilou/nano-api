@@ -59,10 +59,13 @@ const {
 
             delete(this.interval);
             delete(this.finished);
-            Model.DB.disconnect();
 
-            process.stdout.write('\r');
-
+            try {
+              Model.DB.disconnect();
+              process.stdout.write('\r');
+            } catch (error) {
+              process.stdout.write('Error when closing DB\n');
+            }
             return done();
           }
           process.stdout.write('.');

@@ -17,14 +17,12 @@
     "cookie-session": "^1.4.0",
     "express": "^4.17.1",
     "mongoose": "^5.9.16",
-    "node-ipc": "^9.1.1",
     "socket.io": "^2.3.0"
   },
   "devDependencies": {
     "chai": "^4.2.0",
     "chai-http": "^4.3.0",
     "documentation": "^13.0.0",
-    "doxygen": "^0.3.2",
     "esdoc": "^1.1.0",
     "esdoc-standard-plugin": "^1.0.0",
     "eslint": "^7.1.0",
