@@ -175,6 +175,8 @@ jobs:
           command: |
             npm version patch
             git push --tags
+            git commit package.json -m ':robot: version updated'
+            git push origin master
 
 
 
@@ -187,7 +189,7 @@ jobs:
 
       - docker-build:
           description: Build and push latest TAG for APP.
-          file: ./Dockerfile
+          file: ./.circleci/Dockerfile
           tag: web
 
       - unless:
