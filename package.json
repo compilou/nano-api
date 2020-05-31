@@ -48,7 +48,7 @@
     "test": "export NODE_PATH=. && mocha --recursive",
     "test-all": "yarn test-cover; yarn test-report",
     "test-push": "export NODE_PATH=. && cc-test-reporter after-build -t lcov",
-    "test-cover": "export NODE_PATH=. && nyc --all --reporter=lcov --reporter=text mocha --recursive --exclude public --exclude docs --exclude coverage --exclude .nyc_output --report-dir docs/cover",
+    "test-cover": "export NODE_PATH=. && nyc --all --reporter=lcov --reporter=text mocha --recursive --report-dir docs/cover",
     "test-report": "export NODE_PATH=. ; mocha --reporter mochawesome --reporter-options reportDir=./docs/,reportFilename=index.html,charts=true,showSkipped=true,showHooks=true --recursive",
     "default": "export NODE_PATH=. && node $(node -p \"require('./package.json')['main']\")",
     "nodemon": "export NODE_PATH=. && $(npm bin)/nodemon $(node -p \"require('./package.json')['main']\") --ignore 'public/' --ignore 'docs/'",
@@ -56,6 +56,17 @@
     "λ": "yarn install && yarn start"
   },
   "keywords": [],
+  "nyc": {
+    "all": true,
+    "reporter": "lcov",
+    "check-coverage": true,
+    "exclude": [
+      "coverage/**",
+      "public/**",
+      "docs/**",
+      "test/**"
+    ]
+  },
   "esdoc": {
     "source": "./src/",
     "destination": "./docs/esdoc",

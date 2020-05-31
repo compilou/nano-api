@@ -30,51 +30,120 @@
 const ORM = require('../model');
 const Model = ORM(['meeting', 'deliberation']);
 
-const { Render, RENDER_UNPRIVILEDGED } = require('../lib/render');
+const { Render, RENDER_UNPRIVILEDGED, RENDER_BAD_REQUEST } = require('../lib/render');
 const { ACL } = require('../lib/ACL');
 const { saveOne } = require('../lib/utils');
 
 /**
- *
+ * A simple wrapper for HTTP verb/methods.
  *
  * @class Meeting
  * @extends {Controller}
  */
 class Meeting extends Controller {
-  put(req, res) { console.log('put', res.json(['put', this.customPath])); }
+
   patch(req, res) { console.log('patch', res.json(['patch', this.customPath])); }
-  delete(req, res) { console.log('delete', res.json(['delete', this.customPath])); }
 
   /**
+   * Wrapper for DELETE verb/method.
    *
-   *
-   * @param {*} req
-   * @param {*} res
-   * @returns
+   * @param {*} req Express Request instance.
+   * @param {*} res Express Response instance.
+   * @returns Promiseable
    * @memberof Meeting
+   *
+   * Possible responses/status codes - via Express/HTTP interface:
+   *    @httpStatus 202 If the document was found and sent to deletion.
+   *    @httpStatus 400 If there wasn't found by a bad request or something.
+   *    @httpStatus 403 If user aren't authenticated.
+   *    @httpStatus 500 In case of errors.
+   */
+  delete(req, res) {
+    return ACL(req.session, res, (allow) => {
+      if (!allow) {
+        return RENDER_UNPRIVILEDGED(res);
+      }
+      if (!(req.body &amp;&amp; req.body.id)) {
+        return RENDER_BAD_REQUEST(res);
+      }
+      if (req.body.id) {
+        req.body._id = req.body.id;
+        delete(req.body.id);
+      }
+      Model.Meeting
+        .countDocuments(req.body, (error, users) => {
+          const [ text, code ] = [
+            `Removendo ${users.deletedCount} usuario${users.deletedCount > 1 ? 's' : ''}..`,
+            error ? 404 : 202,
+          ];
+          Render(res, text, code);
+        })
+        .deleteMany(req.body, (error) => {
+          console.log(error ? 'Houveram erros.' : 'Com sucesso.', req.body);
+        })
+        .exec(() => console.log('Finalizou exclusão.', req.body));
+    });
+  }
+
+  /**
+   * Wrapper for GET verb/method.
+   *
+   * @param {*} req Express Request instance.
+   * @param {*} res Express Response instance.
+   * @returns Promiseable
+   * @memberof Meeting
+   *
+   * Possible responses/status codes - via Express/HTTP interface:
+   *    @httpStatus 200 With a meetings list.
+   *    @httpStatus 403 If user aren't authenticated.
+   *    @httpStatus 500 In case of errors.
+   *    @httpStatus 517 In case of errors.
    */
   get(req, res) {
     return ACL(req.session, res, (allow) => {
       if (!allow) {
         return RENDER_UNPRIVILEDGED(res);
       }
+      const filter = {};
+      const fields = {
+        sheduled: (d) => {
+          const e = (new Date(d));
+          return {
+            $gte: e,
+            $lte: new Date(new Date(d).setDate(e.getDate()+1))
+          };
+        }
+      };
+
+      Object.keys(req.body).forEach((field) => {
+        if (field in fields) {
+          filter[field] = fields[field](req.body[field]);
+        }
+      });
+
+      console.log('filte', filter);
+
       Model.Meeting
-        .find(req.body)
-        .sort('-id')
+        .find(filter)
         .limit(42)
         .exec((err, meetings) => err
           ? Render(res, 'Ocorreu um erro durante a listagem de assembléias.', 517, [err, meetings])
-          : Render(res, meetings || []));
+          : Render(res, meetings || [], 200, meetings));
     });
   }
 
   /**
+   * Wrapper for POST verb/method.
    *
-   *
-   * @param {*} req
-   * @param {*} res
-   * @returns
+   * @param {*} req Express Request instance.
+   * @param {*} res Express Response instance.
+   * @returns Promiseable
    * @memberof Meeting
+   *
+   * Possible responses/status codes - via Express/HTTP interface:
+   *    @httpStatus 201 With meeting data.
+   *    @httpStatus 403 If user aren't authenticated.
+   *    @httpStatus 500 In case of errors.
    */
   post(req, res) {
     return ACL(req.session, res, (allow) => {
@@ -87,14 +156,9 @@ class Meeting extends Controller {
         e.createdAt = new Date();
       });
 
-      console.log(posted,'mtfck');
-
-      saveOne(Model.Meeting, posted)
+      return saveOne(Model.Meeting, posted)
         .then((saved) => Render(res, `Cadastro de assembléia realizado para "${posted.title}".`, 201, saved))
-        .catch((erro) => console.log('>>>>', erro) &amp;&amp; Render(res, `Falha ao cadastrar "${posted.title}".`, 500, [erro, posted, erro]))
-        .finally((ok) => {
-          console.log('ok', ok);
-        });
+        .catch((erro) => Render(res, `Falha ao cadastrar "${posted.title}".`, 500, [erro, posted, erro]));
     });
   }
 }
@@ -110,13 +174,13 @@ module.exports = Meeting;
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Meeting.html">Meeting</a></li><li><a href="ORM.html">ORM</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Meeting.html">Meeting</a></li><li><a href="ORM.html">ORM</a></li><li><a href="ORM.ORM.html">ORM</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> on Fri May 29 2020 19:44:39 GMT+0000 (Coordinated Universal Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> on Sun May 31 2020 04:55:31 GMT+0000 (Coordinated Universal Time)
 </footer>
 
 <script> prettyPrint(); </script>
