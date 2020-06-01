@@ -25,7 +25,9 @@ const CPFs = Array(10)
   .map(() => SandboxCPF());
 
 'Usuários administrativos'
-  .testList(() => {
+  .testList(function () {
+
+    this.retry = 2;
 
     'Endpoint conectado'
       .test((next) => Plug

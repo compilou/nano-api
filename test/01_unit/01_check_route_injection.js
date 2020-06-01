@@ -99,10 +99,9 @@ class DummieController extends Controller {
       });
     });
 
-    after((q) => {
+    after(() => {
       setTimeout(function () {
-        log() // logs out active handles that are keeping node running
-        q();
+        console.warn(log)  ; // logs out active handles that are keeping node running
       }, 1000);
-    })
+    });
   });

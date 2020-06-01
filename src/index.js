@@ -150,7 +150,9 @@ class μ {
 
 
   shutdown(description, callback) {
-    this.isRunning() && FS.unlinkSync('.pid');
+    if (!this.config.UNITE && FS.existsSync('.pid')) {
+      FS.unlinkSync('.pid');
+    }
     this.log('Preparing to shutdown', [process.title, description || '']);
     this.Gateway.removeAllListeners();
     this.Gateway.close();

@@ -13,6 +13,11 @@ const {
 
 const target = [APP_URL || 'http://localhost', PORT].join(':');
 
+const Model = require('../../src/model')([
+  'user',
+  'meeting',
+  'deliberation',
+]);
 
 
 'Configurações do ambiente'
@@ -45,15 +50,16 @@ const target = [APP_URL || 'http://localhost', PORT].join(':');
       });
 
 
-
     'Variáveis de ambiente corretas para o MongoDB'
       .test((next) => {
+
         const {
           MONGODB_URL = process.env.MONGODB_RESOURCE,
           MONGODB_CFG = {
             useNewUrlParser: true,
             useFindAndModify: false,
-            useUnifiedTopology: true
+            useUnifiedTopology: true,
+            autoCreate: true,
           }
         } = process.env;
 
@@ -61,7 +67,19 @@ const target = [APP_URL || 'http://localhost', PORT].join(':');
           if (err) {
             return next(new Error('Não foi possível conectar no MongoDB utilizando as credenciais informadas.'));
           }
-        }).then(() => {
+        }).then( async () => {
+          if (process.env.RESET_DB) {
+            const DB = Mongoose.connection.db;
+            DB.collections()
+              .then( async (collections) => (await collections.forEach((exact) => exact.drop())))
+              .catch((catched) => {
+              })
+              .finally(async () => {
+                await Object.keys(Model.Models)
+                  .forEach((model) => DB.createCollection(Model.Schema[model], () => {
+                  }));
+              });
+          }
           Mongoose.disconnect().then(() => {
             next();
           });
@@ -74,6 +92,7 @@ const target = [APP_URL || 'http://localhost', PORT].join(':');
 'Servidor web/Express e notificador/SocketIO'
   .testList(() => {
 
+
     'Validando endpoints da interface'
       .test((next) => +λ(target)
         .get('/status')
@@ -84,7 +103,6 @@ const target = [APP_URL || 'http://localhost', PORT].join(':');
 
           const body = JSON.parse(response.text);
           expect(body).to.have.keys(['CPU', 'RAM']);
-
           expect(response.statusCode, target).to.equal(200);
           next();
         }), 7000);
