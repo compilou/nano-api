@@ -35,7 +35,7 @@ class Meeting extends Controller {
       if (!allow) {
         return RENDER_UNPRIVILEDGED(res);
       }
-      if (!(req.body && req.body.id)) {
+      if (!req.body) {
         return RENDER_BAD_REQUEST(res);
       }
       if (req.body.id) {
@@ -43,9 +43,9 @@ class Meeting extends Controller {
         delete(req.body.id);
       }
       Model.Meeting
-        .countDocuments(req.body, (error, users) => {
+        .countDocuments(req.body, (error, meetings) => {
           const [ text, code ] = [
-            `Removendo ${users.deletedCount} usuario${users.deletedCount > 1 ? 's' : ''}..`,
+            `Removendo ${meetings.deletedCount || 'nenhuma'} reuni${meetings.deletedCount > 1 ? 'ões' : 'ão'}..`,
             error ? 404 : 202,
           ];
           Render(res, text, code);
@@ -121,7 +121,9 @@ class Meeting extends Controller {
       posted.createdAt = new Date();
       posted.deliberations.forEach((e) => {
         e.createdAt = new Date();
+        e.dummy = req.header('IS-DUMMY');
       });
+      posted.dummy = req.header('IS-DUMMY');
 
       return saveOne(Model.Meeting, posted)
         .then((saved) => Render(res, `Cadastro de assembléia realizado para "${posted.title}".`, 201, saved))

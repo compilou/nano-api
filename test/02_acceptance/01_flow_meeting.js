@@ -98,6 +98,7 @@ const User = SandboxUsers[0];
             { text: 'Repintura das marcações do estacionamento.' }
           ]
         })
+        .set('IS-DUMMY', true)
         .end((error, response) => {
           if (error) {
             return next(new Error(error));
@@ -119,6 +120,7 @@ const User = SandboxUsers[0];
           call: '19:00',
           deliberations: []
         })
+        .set('IS-DUMMY', true)
         .end((error, response) => {
           if (error) {
             return next(new Error(error));

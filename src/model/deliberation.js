@@ -3,4 +3,5 @@ module.exports = {
   updatedAt: { type: Date, required: false },
   text: { type: String, required: true },
   votes: { type: Array, required: false },
+  dummy: { type: Boolean, required: false },
 };

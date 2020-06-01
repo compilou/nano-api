@@ -25,7 +25,7 @@ const Fails = [];
         const last = Users.length - 1;
         const userCreated = () => this.finished = (seed.push(1), seed.length >= last);
 
-        const checkUsers = (userCreated) => {
+        delay(2000, () => {
           Users.forEach((user) => {
             Model.User.findOne({ username: user.username }, (err, found) => {
               let new_user = (!err && !found) ? user : false;
@@ -33,10 +33,7 @@ const Fails = [];
               if (new_user) {
                 new_user.createdAt = new Date();
                 new_user.password = passwordMaker(new_user.password);
-
-                Model.User.create(user, (err) => {
-                  (err ? Fails.push(user) : false)
-                });
+                Model.User.create(user, (err) => err ? Fails.push(user) : false);
               } else {
                 if (err) {
                   Fails.push(user);
@@ -49,17 +46,7 @@ const Fails = [];
               userCreated();
             });
           });
-        };
-
-        const checking = (() => {
-          if (Model.User && Model.User.findOne) {
-            clearInterval(checking);
-            return checkUsers(userCreated);
-          }
-          process.stdout.write('·');
-          setTimeout(checking, 100);
         });
-
 
         const STALL = (new Date()).getTime() + 5000;
 

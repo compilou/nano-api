@@ -45,9 +45,14 @@ class ORM {
       }
       models.forEach((model) => {
         const Model = model.charAt(0).toUpperCase() + model.slice(1);
+
         try {
           this.Schema[model] = new Schema(require(`./${model}`), { collection: `${model}Collection` });
-          this.Models[model] = Mongoose.model(model, this.Schema[model]);
+          if (!(model in Mongoose.models) || !Mongoose.models[model]) {
+            this.Models[model] = Mongoose.model(model, this.Schema[model]);
+          } else {
+            this.Models[model] = Mongoose.models[model];
+          }
           this[Model] = this.Models[model];
         } catch (error) {
           // console.log("Error loading model", model, error);

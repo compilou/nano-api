@@ -72,8 +72,7 @@ const Model = require('../../src/model')([
             const DB = Mongoose.connection.db;
             DB.collections()
               .then( async (collections) => (await collections.forEach((exact) => exact.drop())))
-              .catch((catched) => {
-              })
+              .catch(() => {})
               .finally(async () => {
                 await Object.keys(Model.Models)
                   .forEach((model) => DB.createCollection(Model.Schema[model], () => {
