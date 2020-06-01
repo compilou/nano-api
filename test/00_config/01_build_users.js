@@ -25,8 +25,7 @@ const Fails = [];
         const last = Users.length - 1;
         const userCreated = () => this.finished = (seed.push(1), seed.length >= last);
 
-        delay(5000, () => {
-
+        const checkUsers = (userCreated) => {
           Users.forEach((user) => {
             Model.User.findOne({ username: user.username }, (err, found) => {
               let new_user = (!err && !found) ? user : false;
@@ -50,7 +49,18 @@ const Fails = [];
               userCreated();
             });
           });
+        };
+
+        const checking = (() => {
+          if (Model.User && Model.User.findOne) {
+            clearInterval(checking);
+            return checkUsers(userCreated);
+          }
+          process.stdout.write('·');
+          setTimeout(checking, 100);
         });
+
+
         const STALL = (new Date()).getTime() + 5000;
 
         this.interval = setInterval(() => {
