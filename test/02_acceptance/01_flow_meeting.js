@@ -42,21 +42,6 @@ const User = SandboxUsers[0];
         });
     });
 
-    after(function (done) {
-      this.timeout(10000);
-      Plug
-        .post('/auth')
-        .send({})
-        .end((error, response) => {
-          done();
-          if (error) {
-            return done(new Error(error));
-          }
-          expect(response.statusCode).to.equal(200);
-        });
-      setTimeout(done, 3666);
-    });
-
     'Endpoint ativo'
       .test((next) => Plug
         .options('/meeting')
