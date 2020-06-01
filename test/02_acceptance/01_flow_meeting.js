@@ -6,7 +6,7 @@ const {
 
 const {
   SandboxUsers,
-  // SandboxCPF,
+  SandboxCPF,
 } = require('../../src/lib/utils');
 
 const {
@@ -18,11 +18,9 @@ const target = [APP_URL || 'http://localhost', PORT].join(':');
 const Plug = λs(target);
 const User = SandboxUsers[0];
 
-// const InvalidUser = ((u) => (u.password = 'invalid!', u))(extract(User, ['username', 'password']));
-
-// const CPFs = Array(10)
-//   .fill(1)
-//   .map(() => SandboxCPF());
+const CPFs = Array(10)
+  .fill(1)
+  .map(() => SandboxCPF());
 
 'Cadastros e controle de atas de assembléias, etc..'
   .testList(function () {
@@ -203,6 +201,39 @@ const User = SandboxUsers[0];
 
 'Acesso como usuário comum.'
   .testList(() => {
+
+
+    before(function (done) {
+      this.retries(3);
+      this.timeout(5000);
+
+      Plug
+        .post('/auth')
+        .send(extract(User, ['username', 'password']))
+        .end((error, response) => {
+          if (error) {
+            return done(new Error(error));
+          }
+          expect(response.statusCode).to.equal(200);
+          expect(response).to.have.cookie('session');
+          done();
+        });
+    });
+
+    after(function (done) {
+      this.timeout(5000);
+      Plug
+        .post('/auth')
+        .send({})
+        .end((error, response) => {
+          if (error) {
+            return done(new Error(error));
+          }
+          expect(response.statusCode).to.equal(200);
+          done();
+        });
+    });
+
 
     'Dashboard com a reunião ativa.'
       .test(function (next) {
