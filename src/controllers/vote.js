@@ -9,16 +9,16 @@ class Vote extends Controller {
 
   put(req, res) {
     return ACL(req.session, res, ((allow) => {
-      // if (!allow) {
-      //   return RENDER_UNPRIVILEDGED(res);
-      // }
+      if (!allow) {
+        return RENDER_UNPRIVILEDGED(res);
+      }
 
       Model.Meeting
         .find({ _id: req.body._id })
         .limit(1)
         .exec((err, meetings) => {
           if (err || !meetings.length) {
-            return Render(res, 'Esta reunião não está com votação ativa ou não existe.', 404)
+            return Render(res, 'Esta reunião não está com votação ativa ou não existe.', 404);
           }
           const meeting = meetings.pop();
           console.log(meeting, 'selecionada');
@@ -64,9 +64,9 @@ class Vote extends Controller {
 
   post(req, res) {
     return ACL(req.session, res, ((allow) => {
-      // if (!allow) {
-      //   return RENDER_UNPRIVILEDGED(res);
-      // }
+      if (!allow) {
+        return RENDER_UNPRIVILEDGED(res);
+      }
       if (req.body.id) {
         req.body._id = req.body.id;
         delete(req.body.id);

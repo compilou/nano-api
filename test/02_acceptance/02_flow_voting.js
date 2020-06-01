@@ -1,11 +1,9 @@
 const {
   λs,
   expect,
-  extract
 } = require('../../src/...');
 
 const {
-  SandboxUsers,
   SandboxCPF,
 } = require('../../src/lib/utils');
 
@@ -16,7 +14,6 @@ const {
 
 const target = [APP_URL || 'http://localhost', PORT].join(':');
 const Plug = λs(target);
-const User = SandboxUsers[0];
 
 const CPFs = Array(10)
   .fill(1)
@@ -60,14 +57,14 @@ const CPFs = Array(10)
     'Endpoint ativo'
       .test((next) => {
         Plug
-        .get('/vote')
-        .end((error, response) => {
-          if (error) {
-            return next(new Error(error));
-          }
-          expect(response.statusCode).to.equal(200);
-          setTimeout(next, 1000);
-        });
+          .get('/vote')
+          .end((error, response) => {
+            if (error) {
+              return next(new Error(error));
+            }
+            expect(response.statusCode).to.equal(200);
+            setTimeout(next, 1000);
+          });
       });
 
     context('Carrega sessão de teste', function () {
@@ -79,7 +76,7 @@ const CPFs = Array(10)
           .get('/meeting')
           .end((error, response) => {
             if (error) {
-              return next(new Error(error));
+              return done(new Error(error));
             }
             expect(response.statusCode).to.equal(200);
             Sessions = response.body;
@@ -89,16 +86,16 @@ const CPFs = Array(10)
 
       after((done) => {
         Plug
-        .post('/vote')
-        .send({ _id: Sessions[0]._id })
-        .end((error, response) => {
-          if (error) {
-            return next(new Error(error));
-          }
-          expect(response.statusCode).to.equal(200);
-          console.log('resumo da votação', response.body);
-          setTimeout(done, 1500);
-        });
+          .post('/vote')
+          .send({ _id: Sessions[0]._id })
+          .end((error, response) => {
+            if (error) {
+              return done(new Error(error));
+            }
+            expect(response.statusCode).to.equal(200);
+            console.log('resumo da votação', response.body);
+            setTimeout(done, 1500);
+          });
       });
 
 

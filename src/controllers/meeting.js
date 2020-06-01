@@ -144,9 +144,9 @@ class Meeting extends Controller {
    */
   post(req, res) {
     return ACL(req.session, res, (allow) => {
-      // if (!allow) {
-      //   return RENDER_UNPRIVILEDGED(res);
-      // }
+      if (!allow) {
+        return RENDER_UNPRIVILEDGED(res);
+      }
       const posted = req.body;
       var deliberations = [];
       posted.createdAt = new Date();
