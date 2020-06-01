@@ -1,6 +1,7 @@
 class Controller {
 
-  constructor() {
+  constructor(DB) {
+    this.DB = DB;
     this.ALOWED_METHODS = ['post', 'put', 'get', 'patch', 'delete', 'head', 'connect', 'options', 'trace'];
   }
 

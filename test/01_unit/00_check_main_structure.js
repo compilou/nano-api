@@ -4,7 +4,7 @@ const {
   expect
 } = require('./../../src/...');
 
-const APP = require('../../src/index');
+const APP = require('./../../src/index');
 
 var Resources = {};
 var Routes = {};

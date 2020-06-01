@@ -67,7 +67,6 @@ const Fails = [];
             } catch (error) {
               process.stdout.write('Error when closing DB\n');
             }
-            // process.exit(22);
             return done();
           }
           process.stdout.write('.');

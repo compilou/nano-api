@@ -51,20 +51,24 @@ class Auth extends Controller {
         ? (UpdateSession(req, found, this) && Render(res, `Bem vindo, ${found.fullname}.`, 200, found))
         : Render(res, `Usuário ${found.username} ou senha incorretos.`, 403, [found, req.body]))
       .catch((error) => {
-        if (((error && error.found !== null)) || !SandboxCPF(req.body.username)) {
+        const subject = (req.body.username || '').replace(/[^0-9]/, '');
+
+        if (((error && error.found !== null)) || !SandboxCPF(subject)) {
+          ClearSession(req, req.session.session, this);
           return Render(res, `Falha ao localizar '${req.body.username}'.`, 403);
         }
-        if (!(auth.username && auth.password)) {
+        if (!auth.username) {
+          ClearSession(req, req.session.session, this);
           return Render(res, 'Efetue login.', 200);
         }
         const user = createUserFrom(req);
 
         return findOne(UserCollection)({ username: user.username }, { username: user.username })
-          .then((found) => Render(res, `Cadastro localizado: ${found.fullname}.`, 309))
+          .then((found) => UpdateSession(req, found, this) && Render(res, `Cadastro localizado: ${found.fullname}.`, 309))
           .catch(() => {
             user.password = passwordMaker(user.password);
             return saveOne(UserCollection, user)
-              .then((saved) => Render(res, `Cadastro realizado para ${saved.fullname}.`, 201, user))
+              .then((saved) => UpdateSession(req, saved, this) && Render(res, `Cadastro realizado para ${saved.fullname}.`, 201, user))
               .catch((erro) => Render(res, `Falha ao cadastrar ${user.username}.`, 500, [user, erro]));
           });
       });

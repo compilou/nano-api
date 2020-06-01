@@ -2,7 +2,7 @@ const FS = require('fs');
 const {
   λ,
   expect
-} = require('src/...');
+} = require('../../src/...');
 const Mongoose = require('mongoose');
 const ENV_FILES = ['.env', '.env.template'];
 

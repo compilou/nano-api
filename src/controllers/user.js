@@ -6,10 +6,6 @@ const { Render, RENDER_UNPRIVILEDGED, RENDER_BAD_REQUEST } = require('../lib/ren
 const { ACL } = require('../lib/ACL');
 
 class User extends Controller {
-  get(req, res) { console.log('get', res.json(['get', this.customPath])); }
-  put(req, res) { console.log('put', res.json(['put', this.customPath])); }
-  post(req, res) { console.log('post', res.json(['post', this.customPath])); }
-  patch(req, res) { console.log('patch', res.json(['patch', this.customPath])); }
 
   /**
    * Wrapper for DELETE verb/method.
@@ -48,6 +44,43 @@ class User extends Controller {
           console.log(error ? 'Houveram erros.' : 'Com sucesso.', req.body);
         })
         .exec(() => console.log('Finalizou exclusão.', req.body));
+    });
+  }
+
+  /**
+   * Wrapper for GET verb/method.
+   *
+   * @param {*} req Express Request instance.
+   * @param {*} res Express Response instance.
+   * @returns Promiseable
+   * @memberof Meeting
+   *
+   * Possible responses/status codes - via Express/HTTP interface:
+   *    @httpStatus 200 If the user was found and sent to deletion.
+   *    @httpStatus 403 If user aren't authenticated.
+   *    @httpStatus 404 If there wasn't found by a bad request or something.
+   *    @httpStatus 500 In case of errors.
+   */
+  get(req, res) {
+    return ACL(req.session, res, (allow) => {
+      if (!allow) {
+        return RENDER_UNPRIVILEDGED(res);
+      }
+      if (!req.body) {
+        return RENDER_BAD_REQUEST(res);
+      }
+      if (req.body.id) {
+        req.body._id = req.body.id;
+        delete(req.body.id);
+      }
+      Model.User
+        .find(req.body)
+        .exec((error, users) => {
+          if (error) {
+            return Render(res, 'Usuário(s) não localizado(s)', 404);
+          }
+          Render(res, users);
+        });
     });
   }
 }

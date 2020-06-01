@@ -50,7 +50,6 @@ const CPFs = Array(10)
             return next(new Error(error));
           }
           expect(response.statusCode).to.equal(403);
-          expect(response).to.not.have.cookie('session');
           next();
         }), 5000);
 

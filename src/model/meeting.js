@@ -1,3 +1,8 @@
+const Mongoose = require('mongoose');
+
+const DELIBERATIONS = new Mongoose
+  .Schema(require('./deliberation'), { collection: 'deliberationCollection' });
+
 module.exports = {
   createdAt: { type: Date, required: true },
   updatedAt: { type: Date, required: false },
@@ -10,14 +15,5 @@ module.exports = {
   dummy: { type: Boolean, required: false },
   time: { type: String, required: false },
   call: { type: String, required: false },
-  deliberations: [{
-    createdAt: { type: Date, required: true },
-    updatedAt: { type: Date, required: false },
-    text: { type: String, required: true },
-    votes: [{
-      createdAt: { type: Date, required: true },
-      user: { type: Object },
-      value: { type: Boolean, required: true },
-    }],
-  }]
+  deliberations: [DELIBERATIONS]
 };

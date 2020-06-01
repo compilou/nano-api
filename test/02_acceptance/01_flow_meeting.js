@@ -146,7 +146,7 @@ const User = SandboxUsers[0];
       .test((next) => {
         Object.assign(Assembleia, {
           description: 'Changed.',
-          status: false,
+          status: true,
         });
 
         Plug
@@ -161,18 +161,6 @@ const User = SandboxUsers[0];
             next();
           });
       });
-
-    'Exclui assembléia'
-      .test((next) => Plug
-        .delete('/meeting')
-        .send({ 'id': Assembleia._id })
-        .end((error, response) => {
-          if (error) {
-            return next(new Error(error));
-          }
-          expect(response.statusCode).to.equal(202);
-          next();
-        }));
 
     if (!process.env.skip) {
       context('Regras de negócio mais refinadas que ficarão pra v2', function () {

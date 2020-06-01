@@ -32,14 +32,14 @@ function UpdateSession (request, session, scope) {
 
 
 function ClearSession (request, session, scope) {
-  console.log('re', request, session, scope);
 
   if (!scope.ACTIVE_USERS) {
     scope.ACTIVE_USERS = [];
   }
-
-  scope.ACTIVE_USERS[session.id] = null;
-  delete(scope.ACTIVE_USERS[session.id]);
+  if (session && session.id) {
+    scope.ACTIVE_USERS[session.id] = null;
+    delete(scope.ACTIVE_USERS[session.id]);
+  }
 
   request.session = null;
   delete(request.session);

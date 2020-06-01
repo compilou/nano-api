@@ -14,7 +14,37 @@ const { saveOne } = require('../lib/utils');
  */
 class Meeting extends Controller {
 
-  patch(req, res) { console.log('patch', res.json(['patch', this.customPath])); }
+  /**
+   * Wrapper for PATCH verb/method.
+   *
+   * @param {*} req Express Request instance.
+   * @param {*} res Express Response instance.
+   * @returns Promiseable
+   * @memberof Meeting
+   *
+   * Possible responses/status codes - via Express/HTTP interface:
+   *    @httpStatus 202 If the document was found and updated.
+   *    @httpStatus 400 If there wasn't found by a bad request or something.
+   *    @httpStatus 403 If user aren't authenticated.
+   *    @httpStatus 500 In case of errors.
+   */
+  patch(req, res) {
+    return ACL(req.session, res, ((allow) => {
+      if (!allow) {
+        return RENDER_UNPRIVILEDGED(res);
+      }
+      Model.Meeting
+        .updateOne({
+          _id: req.body.id,
+          status: true
+        }, {
+          '$set': req.body
+        })
+        .exec((err, meetings) => err
+          ? Render(res, 'Nenhuma reunião localizada.', 404)
+          : Render(res, meetings, 200));
+    }));
+  }
 
   /**
    * Wrapper for DELETE verb/method.
@@ -114,20 +144,23 @@ class Meeting extends Controller {
    */
   post(req, res) {
     return ACL(req.session, res, (allow) => {
-      if (!allow) {
-        return RENDER_UNPRIVILEDGED(res);
-      }
+      // if (!allow) {
+      //   return RENDER_UNPRIVILEDGED(res);
+      // }
       const posted = req.body;
+      var deliberations = [];
       posted.createdAt = new Date();
-      posted.deliberations.forEach((e) => {
-        e.createdAt = new Date();
-        e.dummy = req.header('IS-DUMMY');
+      posted.deliberations.forEach(deliberation => {
+        deliberation.createdAt = new Date();
+        deliberation.dummy = req.header('IS-DUMMY');
+        deliberations.push(Model.Deliberation(deliberation));
       });
+      posted.deliberations = deliberations;
       posted.dummy = req.header('IS-DUMMY');
 
       return saveOne(Model.Meeting, posted)
         .then((saved) => Render(res, `Cadastro de assembléia realizado para "${posted.title}".`, 201, saved))
-        .catch((erro) => Render(res, `Falha ao cadastrar "${posted.title}".`, 500, [erro, posted, erro]));
+        .catch((erro) => Render(res, `Falha ao cadastrar "${posted.title}".`, 500, {erro, posted}));
     });
   }
 }
