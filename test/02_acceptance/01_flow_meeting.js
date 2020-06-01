@@ -160,7 +160,7 @@ const User = SandboxUsers[0];
             expect(response.statusCode).to.equal(200);
             next();
           });
-      });
+      }, 7000);
 
     if (!process.env.skip) {
       context('Regras de negócio mais refinadas que ficarão pra v2', function () {
