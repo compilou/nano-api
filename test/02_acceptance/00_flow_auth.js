@@ -31,7 +31,7 @@ const CPFs = Array(10)
 
     'Endpoint conectado'
       .test((next) => Plug
-        .head('/')
+        .head('/status')
         .end((error, response) => {
           if (error) {
             return next(new Error(error));
