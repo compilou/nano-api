@@ -15,7 +15,7 @@ class ROUTES {
         .filter(((verb) => ALLOWED_VERBS.indexOf(String(verb)) >= 0))
         .forEach((verb) => {
           Server[(verb)](`/${path}`, routing[verb].bind(Server));
-          this.log(`Adding method ${routing[verb].name.toUpperCase()} to /${path}`);
+          this.log(`Adding method: ${routing[verb].name.toUpperCase()} to /${path}`);
         });
     });
   }

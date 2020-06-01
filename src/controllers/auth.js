@@ -32,7 +32,6 @@ class Auth extends Controller {
 
   delete(req, res) {
     return ACL(req.session, res, ((allow) => {
-      // console.log(req.session)
       const user = req.session.session.fullname;
       if (allow) {
         ClearSession(req, req.session.session, this);

@@ -10,11 +10,11 @@ const {
 } = require('../../src/lib/utils');
 
 const {
-  APP_URL = 'http://localhost',
+  APP_URL,
   PORT = 80,
 } = process.env;
 
-const target = [APP_URL, PORT].join(':');
+const target = [APP_URL || 'http://localhost', PORT].join(':');
 const Plug = λs(target);
 const User = SandboxUsers[0];
 
@@ -36,12 +36,15 @@ const User = SandboxUsers[0];
         .send(extract(User, ['username', 'password']))
         .end((error, response) => {
           if (error) {
+            console.log('asasdfasdfdrift');
             return done(new Error(error));
           }
           expect(response.statusCode).to.equal(200);
           expect(response).to.have.cookie('session');
           done();
         });
+
+        console.log(target, Plug);
     });
 
     after(function (done) {

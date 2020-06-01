@@ -37,7 +37,8 @@
     "mocha": "^7.2.0",
     "mochawesome": "^6.1.1",
     "nodemon": "^1.19.2",
-    "nyc": "^15.0.1"
+    "nyc": "^15.0.1",
+    "why-is-node-running": "^2.1.2"
   },
   "scripts": {
     "doc": "yarn doc-jsdoc; yarn doc-mentation; yarn doc-esdoc",
@@ -48,7 +49,7 @@
     "test": "export NODE_PATH=. && mocha --recursive",
     "test-all": "yarn test-cover; yarn test-report",
     "test-push": "export NODE_PATH=. && cc-test-reporter after-build -t lcov",
-    "test-cover": "export NODE_PATH=. && nyc --all --reporter=lcov --reporter=text mocha --recursive --report-dir docs/cover",
+    "test-cover": "export NODE_PATH=. && yarn default& nyc --all --reporter=lcov --reporter=text mocha --recursive --report-dir docs/cover ; kill %1",
     "test-report": "export NODE_PATH=. ; mocha --reporter mochawesome --reporter-options reportDir=./docs/,reportFilename=index.html,charts=true,showSkipped=true,showHooks=true --recursive",
     "default": "export NODE_PATH=. && node $(node -p \"require('./package.json')['main']\")",
     "nodemon": "export NODE_PATH=. && $(npm bin)/nodemon $(node -p \"require('./package.json')['main']\") --ignore 'public/' --ignore 'docs/'",

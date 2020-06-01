@@ -5,9 +5,13 @@ const {
 } = require('src/...');
 const Mongoose = require('mongoose');
 const ENV_FILES = ['.env', '.env.template'];
+
 const {
-  APP_URL = 'http://localhost'
+  APP_URL,
+  PORT = 80,
 } = process.env;
+
+const target = [APP_URL || 'http://localhost', PORT].join(':');
 
 
 
@@ -71,7 +75,7 @@ const {
   .testList(() => {
 
     'Validando endpoints da interface'
-      .test((next) => +λ(APP_URL)
+      .test((next) => +λ(target)
         .get('/status')
         .end((error, response) => {
           if (error) {
@@ -81,7 +85,7 @@ const {
           const body = JSON.parse(response.text);
           expect(body).to.have.keys(['CPU', 'RAM']);
 
-          expect(response.statusCode, APP_URL).to.equal(200);
+          expect(response.statusCode, target).to.equal(200);
           next();
         }), 7000);
 
@@ -89,14 +93,14 @@ const {
     'Validando página de erro'
       .test((next) => {
 
-        +λ(APP_URL)
+        +λ(target)
           .get('/errorpage')
           .end((error, response) => {
             if (error) {
               return next(new Error(error));
             }
-            expect(error, APP_URL).to.null;
-            expect(response.statusCode, APP_URL).to.equal(404);
+            expect(error, target).to.null;
+            expect(response.statusCode, target).to.equal(404);
             next();
           });
       });
