@@ -54,6 +54,7 @@ const User = SandboxUsers[0];
           expect(response.statusCode).to.equal(200);
           done();
         });
+        setTimeout(done, 6666);
     });
 
     'Endpoint ativo'
