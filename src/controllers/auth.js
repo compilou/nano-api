@@ -54,12 +54,10 @@ class Auth extends Controller {
         const subject = (req.body.username || '').replace(/[^0-9]/, '');
 
         if (((error && error.found !== null)) || !SandboxCPF(subject)) {
-          ClearSession(req, req.session.session, this);
-          return Render(res, `Falha ao localizar '${req.body.username}'.`, 403);
+          return ClearSession(req, req.session.session, this) && Render(res, `Falha ao localizar '${req.body.username}'.`, 403);
         }
         if (!auth.username) {
-          ClearSession(req, req.session.session, this);
-          return Render(res, 'Efetue login.', 200);
+          return ClearSession(req, req.session.session, this) && Render(res, 'Efetue login.', 200);
         }
         const user = createUserFrom(req);
 

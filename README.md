@@ -13,10 +13,9 @@
 [![DockerHub      ][ico-dockerhub]][url-dockerhub]
 [![CircleCI       ][ico-circleci ]][url-circleci ]
 [![Service Uptime ][ico-uptime   ]](#)
-<!--
 [![Maintainability][ico-climate  ]][url-climate  ]
 [![Test Coverage  ][ico-coverage ]][url-coverage ]
--->
+
 
 
 

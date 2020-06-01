@@ -4,6 +4,21 @@ const Model = ORM(['meeting', 'deliberation', 'vote']);
 const { Render, RENDER_UNPRIVILEDGED } = require('../lib/render');
 const { ACL } = require('../lib/ACL');
 
+const buildStats = (deliberations) => {
+  const sim = deliberations.votes.filter((vote) => vote.value === 'sim').length;
+  const nao = deliberations.votes.length - sim;
+  return {
+    text: deliberations.text,
+    nao: nao,
+    sim: sim,
+  };
+};
+
+const buildVote = (user, value) => ({
+  createdAt: new Date(),
+  user: user,
+  value: value
+});
 
 class Vote extends Controller {
 
@@ -21,23 +36,14 @@ class Vote extends Controller {
             return Render(res, 'Esta reunião não está com votação ativa ou não existe.', 404);
           }
           const meeting = meetings.pop();
-          console.log(meeting, 'selecionada');
           meeting.deliberations
             .forEach((e, p) => {
               if (e.id === req.body.deliberation.id) {
-                meeting.deliberations[p].votes.push({
-                  createdAt: new Date(),
-                  user: 'user',
-                  value: !!req.body.deliberation.value
-                });
-                console.log(e, p, e.id === req.body.deliberation.id);
+                meeting.deliberations[p].votes.push(buildVote(req.session.session.id, req.body.deliberation.value));
               }
             });
           meeting.save();
-          console.log(meeting);
           Render(res, meeting, 200);
-
-
         });
     }));
   }
@@ -80,13 +86,7 @@ class Vote extends Controller {
           }
           if (meeting.deliberations) {
             for (let n = 0; n < meeting.deliberations.length; n++) {
-              const sim = meeting.deliberations[n].votes.filter((vote) => vote.value === 'sim').length;
-              const nao = meeting.deliberations[n].votes.length - sim;
-              meeting.deliberations[n] = {
-                text: meeting.deliberations[n].text,
-                nao: nao,
-                sim: sim,
-              };
+              meeting.deliberations[n] = buildStats(meeting.deliberations[n]);
             }
           }
           Render(res, meeting, 200);

@@ -4,7 +4,7 @@ const Controller = require('../../src/controllers/controller');
 const {
   // λ,
   expect
-} = require('src/...');
+} = require('./../../src/...');
 
 var Router = require('../../src/routes');
 var Routes = {
