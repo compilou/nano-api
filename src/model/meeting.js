@@ -7,6 +7,7 @@ module.exports = {
   sheduled: { type: Date, required: false },
   notify: { type: Boolean, required: false },
   status: { type: Boolean, required: false },
+  dummy: { type: Boolean, required: false },
   time: { type: String, required: false },
   call: { type: String, required: false },
   deliberations: [{

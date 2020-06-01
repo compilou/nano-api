@@ -14,7 +14,7 @@ const {
   PORT = 80,
 } = process.env;
 
-const target = [APP_URL, PORT].join(':');
+const target = [APP_URL || 'http://localhost', PORT].join(':');
 const Plug = λs(target);
 const User = SandboxUsers[0];
 
@@ -25,7 +25,9 @@ const CPFs = Array(10)
   .map(() => SandboxCPF());
 
 'Usuários administrativos'
-  .testList(() => {
+  .testList(function () {
+
+    this.retry = 2;
 
     'Endpoint conectado'
       .test((next) => Plug

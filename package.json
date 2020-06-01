@@ -9,7 +9,9 @@
   "main": "src/index.js",
   "nodemonConfig": {
     "ignore": [
-      "saved/**"
+      "saved/**",
+      "public/**",
+      "docs/**"
     ]
   },
   "dependencies": {
@@ -37,22 +39,26 @@
     "mocha": "^7.2.0",
     "mochawesome": "^6.1.1",
     "nodemon": "^1.19.2",
-    "nyc": "^15.0.1"
+    "nyc": "^15.0.1",
+    "why-is-node-running": "^2.1.2"
   },
   "scripts": {
-    "doc": "yarn doc-jsdoc; yarn doc-mentation; yarn doc-esdoc",
-    "doc-esdoc": "echo 'ESDoc não tem funcionado muito bem' && exit 0; export NODE_PATH=. && yarn esdoc",
-    "doc-jsdoc": "export NODE_PATH=. && yarn jsdoc -r ./src/**/* ./test/**/* -d docs/jsdoc",
-    "doc-mentation": "export NODE_PATH=. && documentation build ./src/* ./src/**/* ./test/**/* -f html -o docs/documentation --resolve node",
+    "doc": "yarn doc:jsdoc; yarn doc:mentation; yarn doc:esdoc",
+    "doc:esdoc": "echo 'ESDoc não tem funcionado muito bem' && exit 0; export NODE_PATH=. && yarn esdoc",
+    "doc:jsdoc": "export NODE_PATH=. && yarn jsdoc -r ./src/**/* ./test/**/* -d docs/jsdoc",
+    "doc:mentation": "export NODE_PATH=. && documentation build ./src/* ./src/**/* ./test/**/* -f html -o docs/documentation --resolve node",
     "lint": "export NODE_PATH=. && eslint ./",
-    "test": "export NODE_PATH=. && mocha --recursive",
-    "test-all": "yarn test-cover; yarn test-report",
-    "test-push": "export NODE_PATH=. && cc-test-reporter after-build -t lcov",
-    "test-cover": "export NODE_PATH=. && nyc --all --reporter=lcov --reporter=text mocha --recursive --report-dir docs/cover",
-    "test-report": "export NODE_PATH=. ; mocha --reporter mochawesome --reporter-options reportDir=./docs/,reportFilename=index.html,charts=true,showSkipped=true,showHooks=true --recursive",
+    "test": "export NODE_PATH=. && mocha --bail --sort --recursive",
+    "test:all": "for task in cover report; do yarn test:$task; done",
+    "test:push": "export NODE_PATH=. && cc-test-reporter after-build -t lcov",
+    "test:cover": "export NODE_PATH=. && yarn default& nyc --all --reporter=lcov --reporter=text mocha --recursive --report-dir docs/cover ; kill %1",
+    "test:order": "yarn test ./test/index.js",
+    "test:report": "export NODE_PATH=. ; mocha --reporter mochawesome --reporter-options reportDir=./docs/,reportFilename=index.html,charts=true,showSkipped=true,showHooks=true --recursive",
     "default": "export NODE_PATH=. && node $(node -p \"require('./package.json')['main']\")",
-    "nodemon": "export NODE_PATH=. && $(npm bin)/nodemon $(node -p \"require('./package.json')['main']\") --ignore 'public/' --ignore 'docs/'",
+    "nodemon": "export NODE_PATH=. && $(npm bin)/nodemon $(node -p \"require('./package.json')['main']\")",
     "start": "[ \"$ENVIRONMENT\" = \"dev\" ] && yarn nodemon || yarn default",
+    "kill": "for a in $(ps | awk '{ if (NR > 2) print($1) }'); do kill -9 \"$a\"; done",
+    "john": "export APP_URL=172.17.0.2 export skip= ; yarn",
     "λ": "yarn install && yarn start"
   },
   "keywords": [],

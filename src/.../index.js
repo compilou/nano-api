@@ -13,6 +13,8 @@ const delay = (timeout, callback) => new Promise((succes, failure) => {
 String.prototype.test = function (callback, timeout, skippable) {
   new Promise((resolve) => {
     it(String(this), function (next) {
+      this.test.body = String(callback);
+
       if ((skippable > 0)) {
         setTimeout(() => (this.skip(), (next(), resolve())), skippable - 1);
       }
@@ -37,16 +39,31 @@ String.prototype.testList = function(callback) {
 Chai.use(httpChai);
 
 
+
+/**
+ * @description Extract from object only the chosen keys.
+ *
+ * @author John Murowaniecki <john@compilou.com.br>
+ *
+ * @param Object        from Source Object.
+ * @param Array[string] keys Desided keys.
+ *
+ * @returns Object with desided keys.
+ */
+function Extract(from, keys) {
+  const temporary = {};
+  keys.forEach((key) => {
+    temporary[key] = from[key];
+  });
+  return temporary;
+}
+
+
 module.exports = {
   expect: Chai.expect,
 
-  extract: (from, keys) => {
-    const temporary = {};
-    keys.forEach((key) => {
-      temporary[key] = from[key];
-    });
-    return temporary;
-  },
+
+  extract: Extract,
 
   λ: Chai.request,
 

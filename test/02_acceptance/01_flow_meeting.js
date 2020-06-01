@@ -10,11 +10,11 @@ const {
 } = require('../../src/lib/utils');
 
 const {
-  APP_URL = 'http://localhost',
+  APP_URL,
   PORT = 80,
 } = process.env;
 
-const target = [APP_URL, PORT].join(':');
+const target = [APP_URL || 'http://localhost', PORT].join(':');
 const Plug = λs(target);
 const User = SandboxUsers[0];
 
@@ -98,6 +98,7 @@ const User = SandboxUsers[0];
             { text: 'Repintura das marcações do estacionamento.' }
           ]
         })
+        .set('IS-DUMMY', true)
         .end((error, response) => {
           if (error) {
             return next(new Error(error));
@@ -119,6 +120,7 @@ const User = SandboxUsers[0];
           call: '19:00',
           deliberations: []
         })
+        .set('IS-DUMMY', true)
         .end((error, response) => {
           if (error) {
             return next(new Error(error));
@@ -126,6 +128,8 @@ const User = SandboxUsers[0];
           expect(response.statusCode).to.equal(201);
           next();
         }), 5000);
+
+    var Assembleia;
 
     'Lista apenas assembléias do dia seguinte'
       .test((next) => Plug
@@ -135,19 +139,42 @@ const User = SandboxUsers[0];
           if (error) {
             return next(new Error(error));
           }
-          console.log('exect at least 1', response.body);
+          Assembleia = response.body.pop();
           expect(response.statusCode).to.equal(200);
           next();
         }));
 
-    'Adiciona nova assembléia'
-      .test((next) => next());
-
     'Edita assembléia'
-      .test((next) => next());
+      .test((next) => {
+        Object.assign(Assembleia, {
+          description: 'Changed.',
+          status: false,
+        });
+
+        Plug
+          .patch('/meeting')
+          .send({ Assembleia })
+          .end((error, response) => {
+            if (error) {
+              next(new Error(error));
+              return;
+            }
+            expect(response.statusCode).to.equal(200);
+            next();
+          });
+      });
 
     'Exclui assembléia'
-      .test((next) => next());
+      .test((next) => Plug
+        .delete('/meeting')
+        .send({ 'id': Assembleia._id })
+        .end((error, response) => {
+          if (error) {
+            return next(new Error(error));
+          }
+          expect(response.statusCode).to.equal(202);
+          next();
+        }));
 
     if (!process.env.skip) {
       context('Regras de negócio mais refinadas que ficarão pra v2', function () {
@@ -229,9 +256,9 @@ const User = SandboxUsers[0];
 
     if (!process.env.skip) {
       context('Regras de negócio mais refinadas que ficarão pra v2', function () {
-        'Vinculação com biometria e controle gestual para sessões presenciais;'.test(function (next) { this.skip(); next(); }); });
-      'Integração com weareable - ex. xiami band, samsumg gear'.test(function (next) { this.skip(); next(); });
-      'Assessiblidade - visual e motora'.test(function (next) { this.skip(); next();
+        'Vinculação com biometria e controle gestual para sessões presenciais;'.test(function (next) { this.skip(); next(); });
+        'Integração com weareable - ex. xiami band, samsumg gear'.test(function (next) { this.skip(); next(); });
+        'Assessiblidade - visual e motora'.test(function (next) { this.skip(); next(); });
       });
     }
   });

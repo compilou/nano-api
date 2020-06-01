@@ -1,5 +1,6 @@
 const {
   passwordMaker,
+  delay,
 } = require('../../src/...');
 
 const Model = require('../../src/model')([
@@ -10,40 +11,40 @@ const {
   SandboxUsers,
 } = require('../../src/lib/utils');
 
+const Users = SandboxUsers;
+const Fails = [];
 
 
 'Usuários administrativos'
   .testList(() => {
-    const Users = SandboxUsers;
-    const Fails = [];
-
 
     'Usuários criados/senhas reiniciadas'
       .test((done) => {
 
         const seed = [];
         const last = Users.length - 1;
-        const isFinished = () => this.finished = (seed.push(1), seed.length >= last);
+        const userCreated = () => this.finished = (seed.push(1), seed.length >= last);
 
-        Users.forEach((user) => {
-          Model.User.findOne({ username: user.username }, user, (err, found) => {
-            let new_user = (!err && !found) ? user : false;
+        delay(2000, () => {
+          Users.forEach((user) => {
+            Model.User.findOne({ username: user.username }, (err, found) => {
+              let new_user = (!err && !found) ? user : false;
 
-            if (new_user) {
-              new_user.createdAt = new Date();
-              new_user.password = passwordMaker(new_user.password);
-
-              Model.User.create(user, (err) => (err ? Fails.push(user) : false));
-            } else {
-              if (err) {
-                Fails.push(user);
+              if (new_user) {
+                new_user.createdAt = new Date();
+                new_user.password = passwordMaker(new_user.password);
+                Model.User.create(user, (err) => err ? Fails.push(user) : false);
               } else {
-                found.password = passwordMaker(user.password);
-                found.updatedAt = new Date();
-                found.save();
+                if (err) {
+                  Fails.push(user);
+                } else {
+                  found.password = passwordMaker(user.password);
+                  found.updatedAt = new Date();
+                  found.save();
+                }
               }
-            }
-            isFinished();
+              userCreated();
+            });
           });
         });
 
@@ -66,6 +67,7 @@ const {
             } catch (error) {
               process.stdout.write('Error when closing DB\n');
             }
+            // process.exit(22);
             return done();
           }
           process.stdout.write('.');

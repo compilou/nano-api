@@ -5,10 +5,19 @@ const {
 } = require('src/...');
 const Mongoose = require('mongoose');
 const ENV_FILES = ['.env', '.env.template'];
+
 const {
-  APP_URL = 'http://localhost'
+  APP_URL,
+  PORT = 80,
 } = process.env;
 
+const target = [APP_URL || 'http://localhost', PORT].join(':');
+
+const Model = require('../../src/model')([
+  'user',
+  'meeting',
+  'deliberation',
+]);
 
 
 'Configurações do ambiente'
@@ -41,15 +50,16 @@ const {
       });
 
 
-
     'Variáveis de ambiente corretas para o MongoDB'
       .test((next) => {
+
         const {
           MONGODB_URL = process.env.MONGODB_RESOURCE,
           MONGODB_CFG = {
             useNewUrlParser: true,
             useFindAndModify: false,
-            useUnifiedTopology: true
+            useUnifiedTopology: true,
+            autoCreate: true,
           }
         } = process.env;
 
@@ -57,7 +67,18 @@ const {
           if (err) {
             return next(new Error('Não foi possível conectar no MongoDB utilizando as credenciais informadas.'));
           }
-        }).then(() => {
+        }).then( async () => {
+          if (process.env.RESET_DB) {
+            const DB = Mongoose.connection.db;
+            DB.collections()
+              .then( async (collections) => (await collections.forEach((exact) => exact.drop())))
+              .catch(() => {})
+              .finally(async () => {
+                await Object.keys(Model.Models)
+                  .forEach((model) => DB.createCollection(Model.Schema[model], () => {
+                  }));
+              });
+          }
           Mongoose.disconnect().then(() => {
             next();
           });
@@ -70,8 +91,9 @@ const {
 'Servidor web/Express e notificador/SocketIO'
   .testList(() => {
 
+
     'Validando endpoints da interface'
-      .test((next) => +λ(APP_URL)
+      .test((next) => +λ(target)
         .get('/status')
         .end((error, response) => {
           if (error) {
@@ -80,8 +102,7 @@ const {
 
           const body = JSON.parse(response.text);
           expect(body).to.have.keys(['CPU', 'RAM']);
-
-          expect(response.statusCode, APP_URL).to.equal(200);
+          expect(response.statusCode, target).to.equal(200);
           next();
         }), 7000);
 
@@ -89,14 +110,14 @@ const {
     'Validando página de erro'
       .test((next) => {
 
-        +λ(APP_URL)
+        +λ(target)
           .get('/errorpage')
           .end((error, response) => {
             if (error) {
               return next(new Error(error));
             }
-            expect(error, APP_URL).to.null;
-            expect(response.statusCode, APP_URL).to.equal(404);
+            expect(error, target).to.null;
+            expect(response.statusCode, target).to.equal(404);
             next();
           });
       });

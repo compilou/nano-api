@@ -84,19 +84,26 @@ class μ {
 
 
 
-  handlePID() {
-    if (!this.config.UNITE) {
-      let isRunning = this.isRunning();
-      if (isRunning) {
-        try {
-          process.kill(isRunning, 9);
-          this.log('Killed', isRunning);
-        } catch (error) {
-          this.log('Can`t kill', isRunning, error);
-        }
+  forceKill(pid) {
+    try {
+      process.kill(pid, 9);
+      this.log('Killed', pid);
+    } catch (error) {
+      if (error.code !== 'ESRCH') {
+        this.log('Can`t kill', pid, error);
       }
-      FS.writeFileSync('.pid', process.pid);
     }
+  }
+
+  handlePID() {
+    if (this.config.UNITE) {
+      return;
+    }
+    let isRunning = this.isRunning();
+    if (isRunning) {
+      this.forceKill(isRunning);
+    }
+    FS.writeFileSync('.pid', process.pid);
   }
 
 
@@ -105,7 +112,7 @@ class μ {
     if (this.config.UNITE) {
       return process.pid;
     }
-    return FS.existsSync('.pid') ? FS.readFileSync('.pid') : false;
+    return FS.existsSync('.pid') ? FS.readFileSync('.pid', 'utf8') : false;
   }
 
 
@@ -143,7 +150,9 @@ class μ {
 
 
   shutdown(description, callback) {
-    this.isRunning() && FS.unlinkSync('.pid');
+    if (!this.config.UNITE && FS.existsSync('.pid')) {
+      FS.unlinkSync('.pid');
+    }
     this.log('Preparing to shutdown', [process.title, description || '']);
     this.Gateway.removeAllListeners();
     this.Gateway.close();
