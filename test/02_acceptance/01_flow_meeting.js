@@ -194,20 +194,6 @@ const User = SandboxUsers[0];
         });
     });
 
-    after(function (done) {
-      this.timeout(5000);
-      Plug
-        .post('/auth')
-        .send({})
-        .end((error, response) => {
-          if (error) {
-            return done(new Error(error));
-          }
-          expect(response.statusCode).to.equal(200);
-          done();
-        });
-    });
-
 
     'Dashboard com a reunião ativa.'
       .test(function (next) {
