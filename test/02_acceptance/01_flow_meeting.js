@@ -18,9 +18,9 @@ const target = [APP_URL || 'http://localhost', PORT].join(':');
 const Plug = λs(target);
 const User = SandboxUsers[0];
 
-const CPFs = Array(10)
-  .fill(1)
-  .map(() => SandboxCPF());
+// const CPFs = Array(10)
+//   .fill(1)
+//   .map(() => SandboxCPF());
 
 'Cadastros e controle de atas de assembléias, etc..'
   .testList(function () {
