@@ -48,11 +48,11 @@ const User = SandboxUsers[0];
         .post('/auth')
         .send({})
         .end((error, response) => {
+          done();
           if (error) {
             return done(new Error(error));
           }
           expect(response.statusCode).to.equal(200);
-          done();
         });
       setTimeout(done, 3666);
     });
