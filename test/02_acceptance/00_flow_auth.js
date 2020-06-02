@@ -129,19 +129,10 @@ const CPFs = Array(10)
           next();
         })));
 
-    'Edição de usuário'
-      .test((next) => {
-        next();
-      });
-
-    'Exclusão de usuário'
-      .test((next) => {
-        next();
-      });
-
-    'Edição de usuário'
-      .test((next) => {
-        next();
-      });
+    [
+      'Edição de usuário',
+      'Exclusão de usuário',
+      'Edição de usuário',
+    ].forEach((label) => label.test(function (next) { this.skip() && next(); }));
 
   });

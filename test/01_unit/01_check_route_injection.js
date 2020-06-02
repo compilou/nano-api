@@ -81,10 +81,12 @@ class DummieController extends Controller {
 
 
     context('Possíveis questões a serem abordadas em um ambiente mais realista', function () {
-      'Valida emissão de eventos pro Socket.IO'.test(function (done) { this.skip(); done(); });
-      'Segurança do cookie/sessão'.test(function (done) { this.skip(); done(); });
-      'Repressão/limite de acesso (anti-abuso)'.test(function (done) { this.skip(); done(); });
-      'Cluster não gerencia a quantidade real/total de usuários conectados (acima de 40k)'.test(function (done) { this.skip(); done(); });
+      [
+        'Valida emissão de eventos pro Socket.IO',
+        'Segurança do cookie/sessão',
+        'Repressão/limite de acesso (anti-abuso)',
+        'Cluster não gerencia a quantidade real/total de usuários conectados (acima de 40k)',
+      ].forEach((label) => label.test(function (done) { this.skip(); done(); }));
     });
 
     context('Métodos definidos nos controllers', function () {
