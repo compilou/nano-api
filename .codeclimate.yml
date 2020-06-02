@@ -1,0 +1,4 @@
+- "docs/**"
+- ".circleci/**"
+- ".github/**"
+- "public/**"
